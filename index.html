@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    
+    <title>Sapa Pedestrian - SIPEDAS</title>
+    <meta name="description" content="SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo." />
+    <meta name="keywords" content="SIPEDAS, Satlinmas, Ponorogo, Pedestrian, Pejalan kaki, CCTV, Pengaduan, Car Free Day, trotoar" />
+    <meta name="application-name" content="SIPEDAS" />
+    <meta name="apple-mobile-web-app-title" content="SIPEDAS" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:site_name" content="SIPEDAS" />
+    <meta property="og:title" content="SIPEDAS — Sapa Pedestrian Ponorogo" />
+    <meta property="og:description" content="SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo." />
+    <meta property="og:image" content="/assets/icon-512.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SIPEDAS — Sapa Pedestrian Ponorogo" />
+    <meta name="twitter:description" content="SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo." />
+    <meta name="twitter:image" content="/assets/icon-512.png" />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <!-- Font & Icons -->
+    <link rel="dns-prefetch" href="https://unpkg.com" />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin="anonymous" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "GovernmentOrganization",
+            "name": "SIPEDAS — Sapa Pedestrian Ponorogo",
+            "url": "http://localhost:3001",
+            "logo": "http://localhost:3001/assets/icon-512.png",
+            "description": "SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo."
+          },
+          {
+            "@type": "WebSite",
+            "name": "SIPEDAS",
+            "url": "http://localhost:3001",
+            "inLanguage": "id-ID",
+            "description": "SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo."
+          }
+        ]
+      }
+    </script>
+
+    <!-- Dark Mode Anti-Flash Script -->
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    
+    <style>
+      /* Apply Google Font variable matching Next.js --font-inter */
+      :root {
+        --font-inter: 'Inter', sans-serif;
+      }
+      body {
+        font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

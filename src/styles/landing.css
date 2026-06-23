@@ -1,0 +1,284 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIPEDAS — Main Stylesheet
+   Gabungan base.css + landing.css → satu file, diimpor di layout.tsx
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tailwind directives ────────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Skip-link (aksesibilitas keyboard) ─────────────────────────────────── */
+@layer components {
+  .skip-link {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .skip-link:focus {
+    position: fixed;
+    left: 1rem; top: 1rem;
+    z-index: 100;
+    width: auto; height: auto;
+    margin: 0;
+    padding: .5rem 1rem;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    border-radius: .5rem;
+    background: #fff;
+    color: #0f172a;
+    font-size: .875rem;
+    font-weight: 600;
+    outline: none;
+    box-shadow: 0 0 0 2px #2563eb, 0 10px 25px rgba(0,0,0,.15);
+  }
+  .dark .skip-link:focus {
+    background: #0f172a;
+    color: #f8fafc;
+    box-shadow: 0 0 0 2px #60a5fa, 0 10px 25px rgba(0,0,0,.35);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(24px, -40px) scale(1.08); }
+  66%       { transform: translate(-16px, 16px) scale(.94); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientX {
+  0%, 100% { background-position: left center; }
+  50%       { background-position: right center; }
+}
+
+@keyframes radar {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes staticShift {
+  0%   { background-position: 0 0; }
+  50%  { background-position: 2px 2px; }
+  100% { background-position: -2px -2px; }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+  50%       { box-shadow: 0 0 20px 4px rgba(59,130,246,.25); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(.96) translateY(12px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATION UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.animate-blob          { animation: blob 8s ease-in-out infinite; }
+.animate-slide-up      { animation: slideUp .45s cubic-bezier(.22,1,.36,1) forwards; }
+.animate-gradient-x    { animation: gradientX 12s ease infinite; background-size: 200% auto; }
+.animate-radar         { animation: radar 2s linear infinite; }
+.animate-float         { animation: floatY 4s ease-in-out infinite; }
+.animate-shimmer       { animation: shimmer 2.5s linear infinite; background-size: 200% auto; }
+.animate-pulse-glow    { animation: pulseGlow 2.5s ease-in-out infinite; }
+.animate-fade-in-scale { animation: fadeInScale .55s cubic-bezier(.22,1,.36,1) forwards; }
+.animate-spin-slow     { animation: spinSlow 8s linear infinite; }
+
+.animation-delay-100  { animation-delay: 100ms; }
+.animation-delay-200  { animation-delay: 200ms; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);
+}
+.reveal.active { opacity: 1; transform: translateY(0); }
+
+.reveal-delay-1 { transition-delay:  80ms; }
+.reveal-delay-2 { transition-delay: 160ms; }
+.reveal-delay-3 { transition-delay: 240ms; }
+.reveal-delay-4 { transition-delay: 320ms; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLASS PANEL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.glass-panel {
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.55);
+  box-shadow: 0 4px 24px -6px rgba(0,0,0,.09);
+}
+.dark .glass-panel {
+  background: rgba(15,23,42,.78);
+  border-color: rgba(255,255,255,.07);
+  box-shadow: 0 4px 24px -6px rgba(0,0,0,.45);
+}
+
+/* ── Card hover lift ─────────────────────────────────────────────────────── */
+.card-hover {
+  transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,.18);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPECIAL EFFECTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* CCTV static noise */
+.static-noise {
+  background-image: repeating-radial-gradient(
+    circle at 17% 32%,
+    rgba(255,255,255,.05), rgba(255,255,255,.05) 1px,
+    rgba(0,0,0,.08) 1px, rgba(0,0,0,.08) 2px
+  );
+  animation: staticShift .5s infinite steps(2);
+}
+
+/* Radar sweep */
+.radar-sweep {
+  background: conic-gradient(from 0deg, transparent 70%, rgba(59,130,246,.35) 100%);
+  border-radius: 50%;
+}
+
+/* WhatsApp chat background */
+.wa-bg {
+  background-color: #E5DDD5;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239ba9b4' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.dark .wa-bg { background-color: #0B141A; }
+
+/* Video overlay (blokir tombol Drive) */
+.video-overlay-block {
+  position: absolute;
+  z-index: 10;
+  background: #000;
+  pointer-events: all;
+  cursor: default;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY EFFECTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.text-shimmer {
+  background: linear-gradient(90deg,
+    #3b82f6 0%, #818cf8 30%, #a78bfa 50%, #818cf8 70%, #3b82f6 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+.glow-border { position: relative; }
+.glow-border::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(59,130,246,.5), rgba(139,92,246,.5));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity .3s ease;
+  filter: blur(4px);
+}
+.glow-border:hover::after { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.custom-scrollbar::-webkit-scrollbar       { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHOSPHOR ICONS — pastikan font ter-load
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[class^="ph-"]:empty,
+[class*=" ph-"]:empty {
+  display: inline-block;
+  min-width: 1em;
+  min-height: 1em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html           { color-scheme: light; --hero-bg: #f8fafc; }
+html.dark      { color-scheme: dark;  --hero-bg: #020617; }
+
+/* Smooth color transition saat toggle dark mode — hanya properti visual */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Kecualikan media, animasi, dan elemen interaktif — jaga performa */
+img, video, iframe, canvas, svg,
+[class*="animate-"],
+[class*="transition-transform"],
+[class*="transition-all"],
+[class*="hover:scale"],
+[class*="hover:translate"] {
+  transition-property: none !important;
+  transition-duration: 0ms !important;
+}
+
+/* Will-change hints untuk elemen utama saat toggle mode */
+.dark body,
+body {
+  will-change: background-color, color;
+}
+
+
+/* Hero description text-shadow for readability over video */
+.hero-desc {
+  text-shadow: 0 1px 10px rgba(248,250,252,0.95), 0 0 24px rgba(248,250,252,0.8);
+}
+.dark .hero-desc {
+  text-shadow: 0 1px 10px rgba(15,23,42,0.95), 0 0 24px rgba(15,23,42,0.8);
+}
