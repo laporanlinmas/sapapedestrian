@@ -39,8 +39,9 @@ pernah berbeda.
 
 ## 2. Endpoint API
 
-Semua endpoint **hanya pernah membalas JSON** — termasuk saat error — supaya
-frontend tidak pernah tersandung `Unexpected token 'A', "A server e"... is not valid json`.
+Endpoint API membalas JSON saat gagal agar frontend dapat menangani error dengan
+aman. `/api/chat` memakai SSE untuk jawaban yang berhasil di-stream, dan JSON
+untuk fallback saat layanan AI tidak tersedia.
 
 | Method | Endpoint | Fungsi | Batas |
 |---|---|---|---|
@@ -49,6 +50,7 @@ frontend tidak pernah tersandung `Unexpected token 'A', "A server e"... is not v
 | `POST` | `/api/upload-photo` | Unggah 1 foto (opsional, terpisah) | 25 req / menit |
 | `GET`  | `/api/wa-number` | Nomor WA petugas piket hari ini | 40 req / menit |
 | `POST` | `/api/submit-survey` | Simpan survei kepuasan | 6 req / menit |
+| `POST` | `/api/chat` | Jawaban chatbot Nemotron via OpenRouter | 20 req / menit |
 
 Contoh:
 
@@ -147,6 +149,10 @@ aset sumber animasi, dan file lokal yang tidak dibutuhkan runtime deployment.
 
 3. Deploy. `vercel.json` sudah menangani rewrite SPA (`/survey` tetap bisa diakses
    lewat URL langsung) dan batas durasi function.
+
+Chatbot membaca `OPENROUTER_API_KEY` hanya di server. Isi variabel itu di
+Dashboard → Settings → Environment Variables untuk mengaktifkan Nemotron; jangan
+memakai prefix `VITE_` atau memasukkan key ke kode browser.
 
 ---
 

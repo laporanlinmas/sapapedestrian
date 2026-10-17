@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { PenLine, Star } from 'lucide-react';
+import { MessageCircle, PenLine, Star } from 'lucide-react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import SectionLabel from '@/components/SectionLabel';
@@ -92,6 +92,50 @@ function SurveyPageFallback({ onBack }: { onBack: () => void }) {
   );
 }
 
+function ChatbotFallback({ opened, onOpen }: { opened: boolean; onOpen: () => void }) {
+  if (!opened) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label="Buka Chatbot SIPEDAS"
+        className="fixed bottom-5 right-5 z-[1000] flex h-12 w-12 items-center justify-center rounded-full text-white shadow-xl"
+        style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}
+      >
+        <MessageCircle size={22} />
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-0 right-0 z-[1001] flex h-[85dvh] max-h-[680px] w-full flex-col overflow-hidden bg-white shadow-2xl sm:bottom-5 sm:right-5 sm:h-[680px] sm:max-h-[92vh] sm:w-[400px] sm:rounded-3xl" role="status" aria-label="Memuat chatbot" aria-busy="true">
+      <div className="flex h-[72px] shrink-0 items-center gap-3 bg-blue-700 px-5">
+        <span className="h-10 w-10 animate-pulse rounded-xl bg-white/20" />
+        <span className="space-y-2"><span className="block h-3 w-32 animate-pulse rounded bg-white/30" /><span className="block h-2 w-40 animate-pulse rounded bg-white/20" /></span>
+      </div>
+      <div className="flex-1 space-y-5 bg-slate-50 p-5">
+        <span className="block h-14 w-3/4 animate-pulse rounded-2xl bg-white" />
+        <span className="ml-auto block h-12 w-2/3 animate-pulse rounded-2xl bg-blue-100" />
+      </div>
+      <div className="h-16 shrink-0 border-t border-slate-200 bg-white" />
+    </div>
+  );
+}
+
+function AduanPanelFallback() {
+  return (
+    <div className="fixed inset-0 z-[999] bg-slate-900/60 sm:bg-transparent" role="status" aria-label="Memuat formulir aduan" aria-busy="true">
+      <div className="fixed bottom-0 right-0 z-[1000] flex min-h-[480px] max-h-[92dvh] w-full max-w-[440px] flex-col overflow-hidden rounded-t-2xl border border-slate-300 bg-white p-4 shadow-2xl sm:bottom-6 sm:right-6 sm:min-h-[520px] sm:rounded-2xl">
+        <span className="mb-5 h-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+        <span className="mb-3 h-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+        <span className="mb-3 h-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+        <span className="mb-3 h-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+        <span className="h-28 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+      </div>
+    </div>
+  );
+}
+
 const PATH: Record<Route, string> = {
   home: '/',
   rating: '/rating',
@@ -122,10 +166,11 @@ export default function HomePage() {
   const [activeModal,    setActiveModal]    = useState<string | null>(null);
   const [chatbotOpen,    setChatbotOpen]    = useState(false);
   const [aduanOpen,      setAduanOpen]      = useState(false);
+  const chatbotReady                    = useIdleMount(1200);
   const visitorReady                     = useIdleMount();
 
-  const openChatbot = () => { setAduanOpen(false); setChatbotOpen(true); };
-  const openAduan   = () => { setChatbotOpen(false); setAduanOpen(true); };
+  const openChatbot = () => { setActiveModal(null); setAduanOpen(false); setChatbotOpen(true); };
+  const openAduan   = () => { setActiveModal(null); setChatbotOpen(false); setAduanOpen(true); };
 
   // Routing sederhana: / · /survey · /cctv · /mymaps
   const [page, setPage] = useState<Route>(() =>
@@ -137,6 +182,15 @@ export default function HomePage() {
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
+
+  useEffect(() => {
+    const siteOrigin = import.meta.env.VITE_SITE_URL || window.location.origin;
+    const canonicalUrl = new URL(PATH[page], siteOrigin).href;
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    const openGraphUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
+    if (canonical) canonical.href = canonicalUrl;
+    if (openGraphUrl) openGraphUrl.content = canonicalUrl;
+  }, [page]);
 
   const navigateTo = (p: Route) => {
     if (p === page) return;
@@ -159,7 +213,11 @@ export default function HomePage() {
     return () => obs.disconnect();
   }, [page]);
 
-  const open  = (id: string) => setActiveModal(id);
+  const open  = (id: string) => {
+    setChatbotOpen(false);
+    setAduanOpen(false);
+    setActiveModal(id);
+  };
   const close = useCallback(() => setActiveModal(null), []);
 
   if (page === 'rating') {
@@ -273,14 +331,28 @@ export default function HomePage() {
       <JadwalModal isOpen={activeModal === 'jadwalModal'} onClose={close} />
 
       {/* ── Chatbot Terpadu ── */}
-      <Suspense fallback={null}>
-        <ChatbotUnified opened={chatbotOpen} onToggle={(o: boolean) => { setChatbotOpen(o); if (o) setAduanOpen(false); }} />
-      </Suspense>
+      {(chatbotReady || chatbotOpen) && (
+        <Suspense fallback={<ChatbotFallback opened={chatbotOpen} onOpen={() => setChatbotOpen(true)} />}>
+          <ChatbotUnified
+            opened={chatbotOpen}
+            onToggle={(o: boolean) => {
+              setChatbotOpen(o);
+              if (o) { setAduanOpen(false); setActiveModal(null); }
+            }}
+            onOpenResource={(resource) => { setChatbotOpen(false); navigateTo(resource); }}
+            onOpenModal={(modal) => { setChatbotOpen(false); setAduanOpen(false); open(modal); }}
+            onOpenAduan={openAduan}
+            launcherHidden={activeModal !== null}
+          />
+        </Suspense>
+      )}
 
       {/* ── Form Aduan Panel ── */}
-      <Suspense fallback={null}>
-        <AduanPanel opened={aduanOpen} onClose={() => setAduanOpen(false)} />
-      </Suspense>
+      {aduanOpen && (
+        <Suspense fallback={<AduanPanelFallback />}>
+          <AduanPanel opened onClose={() => setAduanOpen(false)} />
+        </Suspense>
+      )}
 
     </div>
   );

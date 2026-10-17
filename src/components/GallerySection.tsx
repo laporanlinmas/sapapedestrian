@@ -156,10 +156,7 @@ export default function GallerySection({ onOpenPage }: { onOpenPage: () => void 
                   slotCount={PREVIEW}
                   cardWidth={CARD_W}
                   onItemError={onPhotoError}
-                  onSelect={(_i, item) => {
-                    const src = items.find((x) => x.id === item.id);
-                    if (src?.large) window.open(src.large, '_blank', 'noopener,noreferrer');
-                  }}
+                  onSelect={onOpenPage}
                   label="Galeri kegiatan — tumpukan foto laporan"
                 />
               ) : (

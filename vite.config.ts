@@ -43,9 +43,13 @@ function loadEnv() {
 
 loadEnv();
 
-// Normalisasi URL situs (tanpa garis miring di akhir) agar index.html,
-// robots.txt, dan sitemap.xml memakai bentuk yang sama.
-process.env.VITE_SITE_URL = (process.env.VITE_SITE_URL || 'http://localhost:3001').replace(/\/+$/, '');
+// Gunakan URL Vercel bila URL domain khusus belum diatur. Di lokal, localhost
+// tetap menjadi fallback agar metadata development tidak menunjuk domain asing.
+const vercelHost = process.env.VERCEL_ENV === 'production'
+  ? process.env.VERCEL_PROJECT_PRODUCTION_URL
+  : process.env.VERCEL_URL;
+const deploymentUrl = vercelHost ? `https://${vercelHost}` : '';
+process.env.VITE_SITE_URL = (process.env.VITE_SITE_URL || deploymentUrl || 'http://localhost:3001').replace(/\/+$/, '');
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 
@@ -255,9 +259,10 @@ function siteMetaPlugin(): Plugin {
 
   const paths: Array<[string, string, string]> = [
     ['/', '1.0', 'weekly'],
+    ['/galeri', '0.9', 'weekly'],
+    ['/rating', '0.5', 'monthly'],
     ['/cctv', '0.9', 'weekly'],
     ['/mymaps', '0.9', 'weekly'],
-    ['/survey', '0.5', 'monthly'],
   ];
 
   const sitemap = [

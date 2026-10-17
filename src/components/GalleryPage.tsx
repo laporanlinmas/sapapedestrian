@@ -80,11 +80,18 @@ export default function GalleryPage({ onBack }: { onBack: () => void }) {
           </p>
         </div>
 
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-24 gap-3" role="status" aria-live="polite">
-            <Loader2 className="w-7 h-7 animate-spin text-emerald-500" aria-hidden />
-            <p className="text-xs text-slate-500 dark:text-slate-400">Memuat galeri kegiatan…</p>
+        {loading && items.length === 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" role="status" aria-label="Memuat galeri kegiatan" aria-busy="true">
+            {Array.from({ length: PER_HALAMAN }, (_, index) => (
+              <div key={index} aria-hidden="true" className="aspect-[4/3] overflow-hidden rounded-xl border border-slate-300 bg-slate-100 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <div className="gallery-skeleton h-full w-full" />
+              </div>
+            ))}
           </div>
+        )}
+
+        {loading && items.length > 0 && (
+          <span className="sr-only" role="status" aria-live="polite">Memuat halaman galeri…</span>
         )}
 
         {!loading && error && (
@@ -107,8 +114,8 @@ export default function GalleryPage({ onBack }: { onBack: () => void }) {
           </div>
         )}
 
-        {!loading && !error && items.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        {items.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" aria-busy={loading || loadingMore}>
             {items.map((item, i) => (
               <button
                 key={item.id}
@@ -151,12 +158,12 @@ export default function GalleryPage({ onBack }: { onBack: () => void }) {
           </div>
         )}
 
-        {!loading && !error && pages > 1 && (
+        {pages > 1 && (
           <div className="mt-8 flex items-center justify-center gap-2">
             <button
               type="button"
               onClick={() => goto(page - 1)}
-              disabled={page <= 1}
+              disabled={loading || page <= 1}
               aria-label="Halaman sebelumnya"
               className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-300 dark:border-slate-700
                          bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300
@@ -171,7 +178,7 @@ export default function GalleryPage({ onBack }: { onBack: () => void }) {
             <button
               type="button"
               onClick={() => goto(page + 1)}
-              disabled={page >= pages}
+              disabled={loading || page >= pages}
               aria-label="Halaman berikutnya"
               className="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-300 dark:border-slate-700
                          bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300

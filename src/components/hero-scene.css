@@ -5,8 +5,8 @@
  *   z-0   .hero-pano ............ panorama 360°, berputar otomatis
  *   z-1   .hero-scrim ........... tirai tema + vignette
  *   z-10  .hero-figure ......... ilustrasi petugas + bayangan di belakangnya
- *   z-20  .hero-content ........ teks & kartu aksi
- *   z-30  .hero-fade ........... tutup bawah ke section berikutnya
+ *   z-20  .hero-fade ........... tutup bawah ke section berikutnya
+ *   z-30  .hero-content ........ teks & kartu aksi
  *
  * Aturan main untuk semua gradien di bawah: TIDAK ADA satu pun
  * `filter: blur()` atau `backdrop-filter`. Foto panorama harus tetap tajam;
@@ -210,42 +210,28 @@
        pernah ikut terpotong — yang keluar hanya ruang kosong — tapi
        seluruh ilustrasi bergeser ke kanan, sehingga celah antara paragraf
        dan petugas bertambah tanpa teks harus diproporsikan lagi. */
-    inset: 0 -2.5% 0 auto;
-    width: 50%;
-    max-width: 1100px;
+    inset: 0 -2.5% 4% auto;
+    width: 56%;
+    max-width: 1200px;
     margin-top: 0;
     pointer-events: none;
   }
 }
 
-/* ── Berapa lebar ilustrasi yang benar-benar muat? ───────────────────────
- *
- * Kolom teks desktop adalah `lg:col-span-6` di dalam `max-w-7xl`, dan itu
- * membuat satu persamaan yang jarang sekali merapikan begini: tepi kanan
- * kolom teks selalu tepat SETENGAH dari lebar viewport — baik di bawah
- * 1344 px (container ikut lebarnya viewport) maupun di atasnya (container
- * terkunci 1280 px di tengah layar).
- *
- *   tepi teks  = W / 2
- *   isi gambar = W − (0,90 + 0,025)·L
- *                                          0,90   = 1 − margin transparan kiri 10%
- *                                          0,025 = bleed kanan di atas
- *   syarat     : isi − tepi teks ≥ 24 px
- *   ⇒  L ≤ (W/2 − 24) / 0,925   ≈  51,6 % dari lebar viewport
- *
- * Persentase di bawah sengaja sedikit di bawah plafon itu. Semuanya sudah
- * diadu dengan kotak teks sungguhan di 1024 / 1152 / 1280 / 1366 / 1440 /
- * 1536 / 1600 / 1800 / 1920 / 2560 px — jarak aman terkecil +24 px. */
+/* Ukuran bertingkat mengisi ruang desktop tanpa mengubah lebar kolom teks.
+  Ilustrasi berada di z-10, sedangkan teks dan kartu aksi di z-30, sehingga
+  sebagian siluet boleh masuk ke belakang konten tanpa menutupi keterbacaan.
+  Batas 1200 px mencegah aset membesar berlebihan pada monitor ultrawide. */
 @media (min-width: 1280px) {
-  .hero-figure { width: 54%; }
+  .hero-figure { width: 58%; }
 }
 
 @media (min-width: 1536px) {
-  .hero-figure { width: 56%; }
+  .hero-figure { width: 62%; }
 }
 
 @media (min-width: 2048px) {
-  .hero-figure { width: 56%; }
+  .hero-figure { width: 62%; }
 }
 
 /* Lebar ilustrasi di bawah 1024 (petugas berdiri di bawah teks).

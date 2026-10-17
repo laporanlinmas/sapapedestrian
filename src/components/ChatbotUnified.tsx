@@ -8,7 +8,7 @@ import {
   resetMemory,
 } from '@/lib/satgaslinmas-knowledge';
 import {
-  Send, X, Camera, Image as ImageIcon, User, Bot,
+  Send, X, Camera, Image as ImageIcon, Images, User, Bot,
   MessageCircle, Clock, ExternalLink, AlertCircle,
   CheckCircle2, Trash2, Phone, Globe, MonitorPlay, Map, Megaphone, Star, Play,
 } from 'lucide-react';
@@ -26,12 +26,14 @@ interface ChatPhoto {
   preview: string;
 }
 
-interface ChatAction {
-  label: string;
-  payload: string;
-  type: 'text' | 'link';
-  icon?: React.ReactNode;
-}
+type ChatResource = 'cctv' | 'mymaps' | 'galeri' | 'rating';
+type ChatInfoModal = 'programModal' | 'jadwalModal';
+
+type ChatAction =
+  | { label: string; payload: string; type: 'text' | 'link'; icon?: React.ReactNode }
+  | { label: string; payload: ChatResource; type: 'route'; icon?: React.ReactNode }
+  | { label: string; payload: ChatInfoModal; type: 'modal'; icon?: React.ReactNode }
+  | { label: string; payload: 'aduan'; type: 'panel'; icon?: React.ReactNode };
 
 interface TicketInfo {
   ticket: string;
@@ -50,8 +52,6 @@ interface ChatMsg {
   text: string;
   /** Penanda pesan yang sedang ditulis AI; dipakai untuk menimpa teksnya. */
   streamId?: number;
-  /** Balasan masih mengalir — dipakai untuk menampilkan kursor. */
-  streaming?: boolean;
   photos?: ChatPhoto[];
   actions?: ChatAction[];
   ticketCard?: TicketInfo;
@@ -269,15 +269,24 @@ function TypingIndicator() {
 export default function ChatbotUnified({
   opened,
   onToggle,
+  onOpenResource,
+  onOpenModal,
+  onOpenAduan,
+  launcherHidden,
 }: {
   opened?: boolean;
   onToggle?: (v: boolean) => void;
+  onOpenResource: (resource: ChatResource) => void;
+  onOpenModal: (modal: ChatInfoModal) => void;
+  onOpenAduan: () => void;
+  launcherHidden?: boolean;
 }) {
   const [messages, setMessages]         = useState<ChatMsg[]>([]);
   const [input, setInput]               = useState('');
   const [isBusy, setIsBusy]             = useState(false);
   const [pendingPhotos, setPendingPhotos] = useState<ChatPhoto[]>([]);
   const [activeStep, setActiveStep]     = useState<ComplaintStep | null>(null);
+  const { ask: askAi, cancel: cancelAi } = useAiChat();
 
   const listRef    = useRef<HTMLDivElement>(null);
   const inputRef   = useRef<HTMLTextAreaElement>(null);
@@ -287,6 +296,7 @@ export default function ChatbotUnified({
   const prevOpened = useRef(false);
 
   const isOpen = opened === true;
+  const isOpenRef = useRef(isOpen);
 
   // ── helpers ──────────────────────────────────────────────────────────────
   const addMsg = useCallback((role: MsgRole, text: string, extra?: Partial<ChatMsg>) => {
@@ -309,16 +319,14 @@ export default function ChatbotUnified({
   //  jawaban yang salah.
   const streamSeq = useRef(0);
   const streamIdRef = useRef(0);
-  const [streamingId, setStreamingId] = useState(0);
 
   const beginStream = useCallback(() => {
     const id = ++streamSeq.current;
     streamIdRef.current = id;
     setMessages(prev => [
       ...prev,
-      { role: 'bot', text: '', ts: timeNow(), streamId: id, streaming: true },
+      { role: 'bot', text: '', ts: timeNow(), streamId: id },
     ]);
-    setStreamingId(id);
     // Scroll ke bawah supaya potongan pertama terlihat.
     requestAnimationFrame(() => {
       const el = document.querySelector('[data-chat-end]');
@@ -336,17 +344,7 @@ export default function ChatbotUnified({
 
   /** Tutup gelembung streaming: whatever yang terkirim tetap dipertahankan. */
   const finishStream = useCallback(() => {
-    const id = streamIdRef.current;
     streamIdRef.current = 0;
-    if (!id) return;
-    setMessages(prev =>
-      prev.map((m) => {
-        if (m.streamId !== id) return m;
-        const { streaming, ...rest } = m;
-        return rest;
-      }),
-    );
-    setStreamingId(0);
   }, []);
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -357,11 +355,11 @@ export default function ChatbotUnified({
     streamIdRef.current = 0;
     if (!id) return;
     setMessages(prev => prev.filter(m => !(m.streamId === id && !m.text.trim())));
-    setStreamingId(0);
   }, []);
 
   // ── open / close lifecycle ────────────────────────────────────────────────
   useEffect(() => {
+    isOpenRef.current = isOpen;
     if (isOpen && !prevOpened.current) {
       setMessages([{
         role: 'bot',
@@ -373,13 +371,16 @@ export default function ChatbotUnified({
       resetMemory();
     }
     if (!isOpen && prevOpened.current) {
+      cancelAi();
       draftRef.current = null;
       setActiveStep(null);
       clearPhotos();
       resetMemory();
     }
     prevOpened.current = isOpen;
-  }, [isOpen, clearPhotos]);
+  }, [isOpen, clearPhotos, cancelAi]);
+
+  useEffect(() => () => cancelAi(), [cancelAi]);
 
   // ── auto-scroll ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -567,16 +568,16 @@ export default function ChatbotUnified({
 
       // CCTV
       if (/cctv|kamera|pantau|live|camera|monitor|sipedas view/i.test(text)) {
-        addMsg('bot', 'Pantauan CCTV live tersedia di menu **SIPEDAS VIEW**. Klik tombol di bawah untuk langsung ke sana:', {
-          actions: [{ label: 'Buka SIPEDAS VIEW', payload: '__scroll:cctv', type: 'text', icon: <MonitorPlay size={13} /> }],
+        addMsg('bot', 'Pantauan CCTV live tersedia di **SIPEDAS VIEW**:', {
+          actions: [{ label: 'Buka SIPEDAS VIEW', payload: 'cctv', type: 'route', icon: <MonitorPlay size={13} /> }],
         });
         return;
       }
 
       // Peta
       if (/peta|kerawanan|rawan|map|lokasi bahaya|titik rawan/i.test(text)) {
-        addMsg('bot', 'Peta kerawanan pedestrian Ponorogo bisa dilihat di menu **Peta Kerawanan**. Klik tombol di bawah:', {
-          actions: [{ label: 'Buka Peta Kerawanan', payload: '__scroll:peta', type: 'text', icon: <Map size={13} /> }],
+        addMsg('bot', 'Peta kerawanan pedestrian Ponorogo tersedia di **Peta Kerawanan**:', {
+          actions: [{ label: 'Buka Peta Kerawanan', payload: 'mymaps', type: 'route', icon: <Map size={13} /> }],
         });
         return;
       }
@@ -585,24 +586,46 @@ export default function ChatbotUnified({
       if (/pengaduan|aduan|laporan|laporkan|komplain/i.test(text)) {
         addMsg('bot', 'Anda bisa membuat laporan langsung lewat form di halaman ini, atau saya bantu proses sekarang:', {
           actions: [
-            { label: 'Buka Form Pengaduan', payload: '__scroll:pengaduan', type: 'text', icon: <Megaphone size={13} /> },
+            { label: 'Buka Form Aduan', payload: 'aduan', type: 'panel', icon: <Megaphone size={13} /> },
             { label: 'Lapor via Chatbot', payload: 'lapor', type: 'text', icon: <AlertCircle size={13} /> },
           ],
         });
         return;
       }
 
+      // Galeri foto
+      if (/galeri|gallery|foto kegiatan|dokumentasi/i.test(text)) {
+        addMsg('bot', 'Dokumentasi kegiatan dapat dibuka di halaman galeri:', {
+          actions: [{ label: 'Buka Galeri', payload: 'galeri', type: 'route', icon: <Images size={13} /> }],
+        });
+        return;
+      }
+
+      // Jadwal dan aturan
+      if (/jadwal|piket|jam bertugas|jam operasional|aturan kawasan/i.test(text)) {
+        addMsg('bot', 'Berikut jadwal dan aturan program Satgas Linmas:', {
+          actions: [{ label: 'Buka Jadwal & Aturan', payload: 'jadwalModal', type: 'modal', icon: <Clock size={13} /> }],
+        });
+        return;
+      }
+
       // Info program / profil
-      if (/program|info|informasi|profil|kegiatan|tentang|sipedas/i.test(text)) {
-        addMsg('bot', 'Informasi lengkap program Satgas Linmas Pedestrian Ponorogo ada di sini:', {
-          actions: [{ label: 'Lihat Info Program', payload: '__scroll:informasi', type: 'text', icon: <AlertCircle size={13} /> }],
+      if (
+        /program|info|informasi|profil|kegiatan|tentang|sipedas/i.test(text) &&
+        !/video|youtube|survei|survey|evaluasi|penilaian|kepuasan|rating|bintang/i.test(text)
+      ) {
+        addMsg('bot', 'Pilih informasi SIPEDAS yang ingin Anda lihat:', {
+          actions: [
+            { label: 'Profil Program', payload: 'programModal', type: 'modal', icon: <AlertCircle size={13} /> },
+            { label: 'Jadwal & Aturan', payload: 'jadwalModal', type: 'modal', icon: <Clock size={13} /> },
+          ],
         });
         return;
       }
 
       // Video profil
-      if (/video|profil|galeri|youtube|dokumentasi/i.test(text)) {
-        addMsg('bot', 'Video profil dan dokumentasi kegiatan bisa dilihat di sini:', {
+      if (/video|youtube/i.test(text)) {
+        addMsg('bot', 'Video profil tersedia di bagian dokumentasi:', {
           actions: [{ label: 'Tonton Video Profil', payload: '__scroll:video', type: 'text', icon: <Play size={13} /> }],
         });
         return;
@@ -610,8 +633,8 @@ export default function ChatbotUnified({
 
       // Rating / evaluasi
       if (/survei|survey|evaluasi|penilaian|kepuasan|rating|bintang/i.test(text)) {
-        addMsg('bot', 'Beri rating untuk layanan Sapa Pedestrian di sini:', {
-          actions: [{ label: 'Beri Rating', payload: '__scroll:rating', type: 'text', icon: <Star size={13} /> }],
+        addMsg('bot', 'Form penilaian layanan Sapa Pedestrian dapat dibuka di sini:', {
+          actions: [{ label: 'Buka Form Rating', payload: 'rating', type: 'route', icon: <Star size={13} /> }],
         });
         return;
       }
@@ -684,15 +707,23 @@ export default function ChatbotUnified({
       //  regex: ia menjawab pertanyaan bebas dengan penalaran sendiri, dan
       //  turunannya bisa langsung menampilkan kata "__SCROLL:pengaduan__"
       //  supaya tombol Form Aduan ikut menyala di bawah jawabannya.
+        //  Jalur AI menjawab pertanyaan bebas. Navigasi dan tindakan operasional
+        //  ditangani oleh route di atas agar selalu menjalankan resource nyata.
       //
       //  Kalau AI tidak bisa dilayani — kunci belum di-set, rate limit, atau
       //  jaringan putus sebelum ada satu pun teks — mesin lokal di bawah
       //  yang menjawab. Tepat satu dari keduanya yang tampil, tidak pernah keduanya.
+      beginStream();
       const ai = await askAi(
         text,
-        toAiHistory(messagesRef.current),
+        toAiHistory(messages),
         (chunk) => appendToStream(chunk),
       );
+
+      if (!isOpenRef.current) {
+        discardStream();
+        return;
+      }
 
       if (ai.ok && ai.text.trim()) {
         finishStream();
@@ -700,9 +731,9 @@ export default function ChatbotUnified({
       }
 
       // Fallback: mesin pengetahuan lokal (BM25+ atas dokumen resmi).
+      discardStream();
       const doc = await getSatgasLinmasText();
       const answer = askChatbot(text, doc);
-      finishStream();
       await typingDelay(answer);
       addMsg('bot', answer);
 
@@ -714,6 +745,20 @@ export default function ChatbotUnified({
 
   const handleAction = (act: ChatAction) => {
     if (act.type === 'link') { window.open(act.payload, '_blank'); return; }
+    if (act.type === 'route') {
+      onToggle?.(false);
+      onOpenResource(act.payload);
+      return;
+    }
+    if (act.type === 'modal') {
+      onToggle?.(false);
+      onOpenModal(act.payload);
+      return;
+    }
+    if (act.type === 'panel') {
+      onOpenAduan();
+      return;
+    }
     if (act.payload.startsWith('__scroll:')) {
       const id = act.payload.replace('__scroll:', '');
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -732,9 +777,11 @@ export default function ChatbotUnified({
       {/* ── Trigger button — lebih kecil ── */}
       <button
         onClick={() => onToggle?.(true)}
+        disabled={isOpen || launcherHidden}
+        aria-hidden={isOpen || launcherHidden}
         aria-label="Buka Chatbot SIPEDAS"
         className={`fixed bottom-5 right-5 z-[1000] flex h-12 w-12 items-center justify-center rounded-full text-white shadow-xl transition-all duration-500 hover:scale-110 active:scale-95 ${
-          isOpen ? 'pointer-events-none scale-0 opacity-0' : 'scale-100 opacity-100'
+          isOpen || launcherHidden ? 'pointer-events-none scale-0 opacity-0' : 'scale-100 opacity-100'
         }`}
         style={{ background: NAV_GRADIENT }}
       >

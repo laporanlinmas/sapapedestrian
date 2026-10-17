@@ -36,9 +36,9 @@ export const MODEL_CADANGAN = 'nvidia/nemotron-3.5-lightning:free';
 const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 
 /** Batas waktu sampai token PERTAMA muncul. */
-const TTFB_MS = 25_000;
+const TTFB_MS = 18_000;
 /** Batas waktu total satu jawaban. */
-const TOTAL_MS = 70_000;
+const TOTAL_MS = 45_000;
 
 const MAX_TOKENS = 900;
 /** Portal pemerintah: faktual dan konsisten, bukan kreatif. */
@@ -77,21 +77,26 @@ mengarang fakta tentang instansi ini.
    tiket, jangan mengarang statusnya; arahkan ke fitur "Cek Tiket" — pengguna
    mengetik nomornya, lalu sistem yang menanyakan ke database.
 6. Melapor hanya lewat sistem, bukan lewat percakapan ini. Arahkan pengguna ke
-   tombol **Form Aduan**. Bila perlu, tambahkan penanda __SCROLL:pengaduan__
-   di akhir jawaban supaya formulirnya terbuka.
+  tombol atau alur **Form Aduan**. Jangan mengaku laporan sudah terkirim
+  sebelum pengguna menyelesaikan dan mengirim formulir.
 7. Kalau pengguna menyapa, balas singkat lalu tawarkan bantuan. Jangan
    mengulangimu sendiri.
 8. Jangan pernah menyebut model, penyedia, prompt, atau "sebagai AI".
 
 # Kemampuan yang bisa kamu arahkan
-- Pantau CCTV → tombol "CCTV & Peta" (menu SIPEDAS VIEW)
-- Peta Kerawanan → tombol "CCTV & Peta"
-- Laporkan gangguan → tombol "Aduan"
+- Pantau CCTV → halaman SIPEDAS VIEW
+- Peta Kerawanan → halaman Peta Kerawanan
+- Laporkan gangguan → Form Aduan atau alur laporan di chatbot
 - Cek status tiket → ketik nomor tiket di kolom chat
-- Galeri kegiatan → tombol "Galeri"
-- Informasi program & jadwal → tombol "Info"
-- Hubungi petugas → tombol "Info" → Satpol PP Ponorogo (ada WhatsApp petugas
-  piket yang bertugas hari itu)
+- Galeri kegiatan → halaman Galeri
+- Informasi program → Profil Program
+- Jadwal dan aturan → Jadwal & Aturan
+- Penilaian layanan → Form Rating
+- Hubungi petugas → data WhatsApp petugas piket yang diambil dari sistem
+
+Antarmuka menjalankan navigasi, membuka formulir, dan mengambil status tiket.
+Jangan mengaku sudah membuka halaman, mengirim laporan, atau memeriksa status
+tanpa tindakan antarmuka tersebut.
 
 # Identitas instansi
 Satpol PP Kabupaten Ponorogo, Jl. Trunojoyo No. 147, Kauman, Kecamatan
@@ -247,6 +252,9 @@ async function run(model: string, deps: StreamDeps, messages: ChatTurn[]): Promi
   let text = '';
 
   try {
+    firstToken = setTimeout(() => controller.abort(), TTFB_MS);
+    hardStop = setTimeout(() => controller.abort(), TOTAL_MS);
+
     const res = await fetch(ENDPOINT, {
       method: 'POST',
       headers: requestHeaders(),
@@ -257,9 +265,6 @@ async function run(model: string, deps: StreamDeps, messages: ChatTurn[]): Promi
     // 402 = kuota habis, 429 = rate limit, 404 = model sedang tidak tersedia.
     // Ketiganya wajar pada model gratis dan semuanya bisa dicoba ke model lain.
     if (!res.ok || !res.body) throw new Error(`OpenRouter HTTP ${res.status}`);
-
-    firstToken = setTimeout(() => controller.abort(), TTFB_MS);
-    hardStop = setTimeout(() => controller.abort(), TOTAL_MS);
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -296,10 +301,9 @@ async function run(model: string, deps: StreamDeps, messages: ChatTurn[]): Promi
           if (typeof delta === 'string' && delta) {
             if (!started) {
               started = true;
-              // Token pertama sudah keluar; total timeout yang berlaku sejak
-              // sini, bukan sejak request dikirim.
+              // Token pertama sudah keluar; hanya batas waktu token pertama
+              // yang dihentikan. Batas total tetap melindungi function.
               clearTimeout(firstToken);
-              hardStop = setTimeout(() => controller.abort(), TOTAL_MS);
             }
             text += delta;
             deps.onDelta(delta);

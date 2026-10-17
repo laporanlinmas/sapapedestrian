@@ -67,19 +67,22 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const history = Array.isArray(body?.history) ? body.history : [];
   const context = await buildContext(question, originOf(req));
 
-  /* ── Beralih ke SSE ─────────────────────────────────────────────────────
-     Header ditulis HANYA di sini, setelah semua pemeriksaan yang bisa gagal
-     dengan JSON. Selepas baris ini, jalan kembali hanya satu: stream atau
-     JSON fallback. */
-  res.status(200);
-  res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-store, no-transform');
-  res.setHeader('Connection', 'keep-alive');
-  // Cegah proxy(Vercel/nginx) menahan stream di buffer.
-  res.setHeader('X-Accel-Buffering', 'no');
-  res.flushHeaders?.();
-
+  /* Tunda header SSE sampai delta pertama agar fallback JSON tetap mungkin
+     bila kedua model gagal sebelum menghasilkan jawaban. */
+  let streamStarted = false;
+  const startStream = () => {
+    if (streamStarted) return;
+    streamStarted = true;
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    // Cegah proxy(Vercel/nginx) menahan stream di buffer.
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders?.();
+  };
   const write = (payload: object) => {
+    startStream();
     res.write(`data: ${JSON.stringify(payload)}\n\n`);
   };
 
@@ -93,10 +96,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   if (!result.ok) {
     // Belum ada satu pun byte jawaban yang keluar — mundur ke JSON supaya
     // frontend bisa memakai mesin lokal.
-    res.removeHeader('Content-Type');
-    res.removeHeader('X-Accel-Buffering');
-    res.statusCode = 200;
-    return res.json({
+    return res.status(200).json({
       ok: false,
       reason: 'upstream',
       error: 'Layanan AI sedang tidak dapat dihubungi.',

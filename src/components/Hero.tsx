@@ -91,16 +91,14 @@ export default function Hero() {
           mengisi ruang bawah (lihat blok ilustrasi di bawah). `content-center`
           menjaga teks tetap duduk di tengah ruang yang tersisa — tanpa itu teks
           nempel ke atas dan menyisakan ruang mati besar di antara teks dan petugas. */}
-      <div className="hero-content mx-auto w-full max-w-7xl flex-1 px-4 pb-2 pt-[4.75rem] sm:px-6 sm:pt-24 lg:px-8 lg:pb-24 lg:pt-36">
+      <div className="hero-content mx-auto w-full max-w-7xl flex-1 px-4 pb-2 pt-[4.75rem] sm:px-6 sm:pt-24 lg:px-8 lg:pb-24 lg:pt-32">
         {/* `flex-1`, bukan `h-full`: `.hero-content` sekarang flex column (lihat
             hero-scene.css), jadi grid ini diregangkan sebagai flex item.
             `height: 100%` tidak akan resolve di sana — tinggi `.hero-content`
             datang dari flex layout, bukan dari properti `height`. */}
         <div className="grid flex-1 grid-cols-1 content-center items-center lg:grid-cols-12">
-          {/* `col-span-6`, bukan 7/8: kolom ini yang menentukan seberapa besar
-              ilustrasi bisa berdiri di sebelah kanan. Dengan 6 dari 12, tepi
-              kanan teks jatuh persis di W/2 dan ilustrasi muat ±51% dari
-              lebar viewport — naik dari 42% sebelum kolom ini disempitkan. */}
+            {/* `col-span-6` menjaga lebar teks; ilustrasi desktop boleh
+              sedikit masuk ke belakang teks karena berada di layer bawah. */}
           <div className="flex flex-col justify-center text-center lg:col-span-6 lg:text-left">
             
             {/* Teks Identitas Sistem */}
