@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+     ASET HERO — DIMUAT DI AWAL, SEBELUM JAVASCRIPT
+     ═══════════════════════════════════════════════════════════════════
+     Hero adalah yang pertama dilihat, jadi dua aset ini harus diminta lebih
+     awal dari apa pun — bukan menunggu React mount dulu.
+
+       · hero-petugas-poster.webp (33 KB) → petugas langsung terlihat.
+         Yang animasi (±1,3 MB) sengaja TIDAK di-preload: memaksa 1,3 MB
+         mendahului JS akan menunda judul dan justru memperlambat LCP. File itu
+         tetap diambil lewat `requestIdleCallback` setelah 4 detik.
+       · 360.webp (840 KB) → latar panorama, isi hero yang paling besar.
+         Kanvasnya sudah menggambar gradien tema selama menunggu, jadi tidak
+         ada kedipan; begitu file ini sampai, hero bertransisi mulus ke foto.
+
+     Kenapa di-inject lewat skrip, bukan `<link rel="preload">` biasa?
+
+     Karena `<link>` statis tidak bisa membaca `navigator.connection.saveData`.
+     Script ini berjalan di dalam `<head>` — jauh sebelum body di-parse, jadi
+     tetap "paling awal" — tetapi ia TIDAK preload apa pun kalau pengguna
+     menyalakan Save-Data. Tanpa pengecekan ini, panorama 840 KB justru turun juga
+     ke pengguna yang justru meminta hemat data; komponennya sudah menahan
+     unduhan itu, dan preload akan membatalkannya.
+
+     Blok ini sengaja ditaruh SEKARANG, di anak pertama `<head>` — parser
+    _app_nya tinggal beberapa byte sebelum preload masuk, jadi antrean unduhan
+     tidak tertunda oleh tag favicon di bawahnya.
+
+     Nol request tambahan: skrip inline, nol dependensi.
+
+     Ketiganya sudah diberi header cache jangka panjang di vercel.json, jadi
+     kunjungan berikutnya tidak mengunduh ulang sama sekali.
+     ═══════════════════════════════════════════════════════════════ -->
+    <script>
+      (function () {
+        try {
+          var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
+          if (c.saveData) return;                 /* Save-Data: jangan sentuh bandwidth */
+          var src = ['/assets/hero-petugas-poster.webp', '/assets/360.webp'];
+          for (var i = 0; i < src.length; i++) {
+            var l = document.createElement('link');
+            l.rel = 'preload';
+            l.as = 'image';
+            l.type = 'image/webp';
+            l.href = src[i];
+            l.fetchPriority = 'high';
+            document.head.appendChild(l);
+          }
+        } catch (e) { /* preload hanya bonus; kalau gagal, hero tetap jalan */ }
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    
+    <title>Sapa Pedestrian - SIPEDAS</title>
+    <meta name="description" content="SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo." />
+    <meta name="keywords" content="SIPEDAS, Satgas Linmas, Ponorogo, Pedestrian, Pejalan kaki, CCTV, Pengaduan, Car Free Day, trotoar" />
+    <meta name="application-name" content="SIPEDAS" />
+    <meta name="apple-mobile-web-app-title" content="SIPEDAS" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:site_name" content="SIPEDAS" />
+    <meta property="og:title" content="SIPEDAS — Sapa Pedestrian Ponorogo" />
+    <meta property="og:description" content="SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo." />
+    <meta property="og:url" content="%VITE_SITE_URL%/" />
+    <meta property="og:image" content="/assets/icon-512.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SIPEDAS — Sapa Pedestrian Ponorogo" />
+    <meta name="twitter:description" content="SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo." />
+    <meta name="twitter:image" content="/assets/icon-512.png" />
+
+    <!-- Ikon: satu set kanonik dari /public/assets -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/icon-48.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png" />
+    <link rel="icon" href="/assets/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" /></noscript>
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "GovernmentOrganization",
+            "name": "SIPEDAS — Sapa Pedestrian Ponorogo",
+            "url": "%VITE_SITE_URL%/",
+            "logo": "%VITE_SITE_URL%/assets/icon-512.png",
+            "description": "SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo."
+          },
+          {
+            "@type": "WebSite",
+            "name": "SIPEDAS",
+            "url": "%VITE_SITE_URL%/",
+            "inLanguage": "id-ID",
+            "description": "SIPEDAS Sapa Pedestrian Ponorogo — Pemantauan CCTV, peta kerawanan, dan layanan informasi kawasan pedestrian Kabupaten Ponorogo."
+          }
+        ]
+      }
+    </script>
+
+    <!-- Dark Mode Anti-Flash Script -->
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    
+    <style>
+      /* Apply Google Font variable matching Next.js --font-inter */
+      :root {
+        --font-inter: 'Inter', sans-serif;
+      }
+      body {
+        font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "name": "sipedas-landing",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run typecheck && vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit --noUnusedLocals --noUnusedParameters",
+    "test": "node --experimental-strip-types --test scripts/*.test.mts",
+    "audit:unused": "knip --no-progress --include files,dependencies,unlisted,unresolved,binaries",
+    "check": "npm run lint && npm test && npm run audit:unused",
+    "preview": "vite preview",
+    "build:gallery-index": "node --experimental-strip-types scripts/build-gallery-index.mts",
+    "build:hero-anim": "node --experimental-strip-types scripts/build-hero-anim.mts",
+    "verify:dates": "node --experimental-strip-types scripts/verify-dates.mts"
+  },
+  "dependencies": {
+    "cloudinary": "^2.11.0",
+    "firebase": "^12.14.0",
+    "lucide-react": "1.20.0",
+    "motion": "^14.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.41",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@vercel/node": "^5.8.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "esbuild": "^0.27.7",
+    "knip": "^6.41.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5",
+    "vite": "^5.2.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.6"
+  }
+}

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Halaman ini adalah aplikasi web (client-side routing).
+Disallow: /api/
+
+Sitemap: http://localhost:3001/sitemap.xml

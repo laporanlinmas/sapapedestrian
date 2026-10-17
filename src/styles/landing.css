@@ -1,0 +1,489 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIPEDAS — Main Stylesheet
+   Gabungan base.css + landing.css → satu file, diimpor di layout.tsx
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tailwind directives ────────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Skip-link (aksesibilitas keyboard) ─────────────────────────────────── */
+@layer components {
+  .skip-link {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .skip-link:focus {
+    position: fixed;
+    left: 1rem; top: 1rem;
+    z-index: 100;
+    width: auto; height: auto;
+    margin: 0;
+    padding: .5rem 1rem;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    border-radius: .5rem;
+    background: #fff;
+    color: #0f172a;
+    font-size: .875rem;
+    font-weight: 600;
+    outline: none;
+    box-shadow: 0 0 0 2px #2563eb, 0 10px 25px rgba(0,0,0,.15);
+  }
+  .dark .skip-link:focus {
+    background: #0f172a;
+    color: #f8fafc;
+    box-shadow: 0 0 0 2px #60a5fa, 0 10px 25px rgba(0,0,0,.35);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BACKDROP HALUS
+   ═══════════════════════════════════════════════════════════════════════════
+   Effek "blob" sebelumnya memakai 3 element `blur-3xl` + animasi. Filter blur
+   pada element yang bergerak diproses ulang di setiap frame — mahal, terutama
+   di ponsel. Diganti radial-gradient statis: di-raster sekali, nol biaya
+   per-frame, tampilan nyaris sama.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background:
+    radial-gradient(48rem 32rem at 8% -6%,  rgb(96 165 250 / .13), transparent 62%),
+    radial-gradient(40rem 30rem at 98% 32%, rgb(168 85 247 / .10), transparent 60%),
+    radial-gradient(44rem 30rem at 42% 104%, rgb(253 224 71 / .10), transparent 62%);
+}
+
+.dark .page-backdrop {
+  background:
+    radial-gradient(48rem 32rem at 8% -6%,  rgb(59 130 246 / .10), transparent 62%),
+    radial-gradient(40rem 30rem at 98% 32%, rgb(147 51 234 / .09), transparent 60%),
+    radial-gradient(44rem 30rem at 42% 104%, rgb(245 158 11 / .06), transparent 62%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientX {
+  0%, 100% { background-position: left center; }
+  50%       { background-position: right center; }
+}
+
+@keyframes radar {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes staticShift {
+  0%   { background-position: 0 0; }
+  50%  { background-position: 2px 2px; }
+  100% { background-position: -2px -2px; }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+  50%       { box-shadow: 0 0 20px 4px rgba(59,130,246,.25); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(.96) translateY(12px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATION UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.animate-slide-up      { animation: slideUp .45s cubic-bezier(.22,1,.36,1) forwards; }
+.animate-gradient-x    { animation: gradientX 12s ease infinite; background-size: 200% auto; }
+.animate-radar         { animation: radar 2s linear infinite; }
+.animate-float         { animation: floatY 4s ease-in-out infinite; }
+.animate-shimmer       { animation: shimmer 2.5s linear infinite; background-size: 200% auto; }
+.animate-pulse-glow    { animation: pulseGlow 2.5s ease-in-out infinite; }
+.animate-fade-in-scale { animation: fadeInScale .55s cubic-bezier(.22,1,.36,1) forwards; }
+.animate-spin-slow     { animation: spinSlow 8s linear infinite; }
+
+.animation-delay-100  { animation-delay: 100ms; }
+.animation-delay-200  { animation-delay: 200ms; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);
+}
+.reveal.active { opacity: 1; transform: translateY(0); }
+
+.reveal-delay-1 { transition-delay:  80ms; }
+.reveal-delay-2 { transition-delay: 160ms; }
+.reveal-delay-3 { transition-delay: 240ms; }
+.reveal-delay-4 { transition-delay: 320ms; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLASS PANEL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.glass-panel {
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.55);
+  box-shadow: 0 4px 24px -6px rgba(0,0,0,.09);
+}
+.dark .glass-panel {
+  background: rgba(15,23,42,.78);
+  border-color: rgba(255,255,255,.07);
+  box-shadow: 0 4px 24px -6px rgba(0,0,0,.45);
+}
+
+/* ── Card hover lift ─────────────────────────────────────────────────────── */
+.card-hover {
+  transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,.18);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPECIAL EFFECTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* CCTV static noise */
+.static-noise {
+  background-image: repeating-radial-gradient(
+    circle at 17% 32%,
+    rgba(255,255,255,.05), rgba(255,255,255,.05) 1px,
+    rgba(0,0,0,.08) 1px, rgba(0,0,0,.08) 2px
+  );
+  animation: staticShift .5s infinite steps(2);
+}
+
+/* Radar sweep */
+.radar-sweep {
+  background: conic-gradient(from 0deg, transparent 70%, rgba(59,130,246,.35) 100%);
+  border-radius: 50%;
+}
+
+/* WhatsApp chat background */
+.wa-bg {
+  background-color: #E5DDD5;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239ba9b4' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.dark .wa-bg { background-color: #0B141A; }
+
+/* Video overlay (blokir tombol Drive) */
+.video-overlay-block {
+  position: absolute;
+  z-index: 10;
+  background: #000;
+  pointer-events: all;
+  cursor: default;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY EFFECTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.text-shimmer {
+  background: linear-gradient(90deg,
+    #3b82f6 0%, #818cf8 30%, #a78bfa 50%, #818cf8 70%, #3b82f6 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+.glow-border { position: relative; }
+.glow-border::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(59,130,246,.5), rgba(139,92,246,.5));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity .3s ease;
+  filter: blur(4px);
+}
+.glow-border:hover::after { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.custom-scrollbar::-webkit-scrollbar       { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html           { color-scheme: light; --hero-bg: #f8fafc; }
+html.dark      { color-scheme: dark;  --hero-bg: #020617; }
+
+/* Animate theme colors only during the change, not during every interaction. */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke !important;
+  transition-duration: 180ms !important;
+  transition-timing-function: cubic-bezier(.4, 0, .2, 1) !important;
+}
+
+html.theme-transitioning img,
+html.theme-transitioning video,
+html.theme-transitioning iframe,
+html.theme-transitioning canvas {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning,
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition-duration: 0ms !important;
+  }
+}
+
+
+/* Hero description text-shadow for readability over video */
+.hero-desc {
+  text-shadow: 0 1px 10px rgba(248,250,252,0.95), 0 0 24px rgba(248,250,252,0.8);
+}
+.dark .hero-desc {
+  text-shadow: 0 1px 10px rgba(15,23,42,0.95), 0 0 24px rgba(15,23,42,0.8);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TUMPUKAN KARTU GALERI
+   ═══════════════════════════════════════════════════════════════════════════
+   Seluruh ukuran dihitung di CSS lewat satu custom property. Tidak ada
+   pengukuran DOM, tidak ada ResizeObserver, dan kartu tidak mungkin meluber
+   saat viewport berubah atau perangkat dirotasi:
+
+     --card-w : min(320px, 100vw − 2rem)     ← dilepas dari React
+     tinggi   : aspect-ratio 16/10          ← melekat pada kartunya
+     ruang    : 96 px                        ← ruang untuk 3 kartu di belakang
+                                              (3 × FRAME_OFFSET = 90 px)
+
+   `touch-action: pan-y` itu disengaja: gesek horizontal berpindah kartu,
+   gesek vertikal tetap menggulir halaman. Widget dekoratif tidak boleh
+   merebut scroll. */
+
+.gallery-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  /* Fokus keyboard harus terlihat jelas di atas foto. */
+  border-radius: 1rem;
+  outline: none;
+  /* PENTING. `pan-y` memberi gesek horizontal ke JavaScript (pindah kartu)
+   * sementara gesek vertikal tetap diurus browser sebagai scroll halaman.
+   * Dengan `auto`, gestur vertikal bisa dicegat browser duluan dan kartu
+   * tidak pernah bergeser di HP; dengan `none`, halaman tidak bisa digulir
+   * selama jari di atas tumpukan. Widget dekoratif tidak boleh merebut
+   * scroll halaman. */
+  touch-action: pan-y;
+}
+
+.gallery-stack:focus-visible {
+  box-shadow: 0 0 0 2px rgb(147 197 253 / 0.9), 0 0 0 5px rgb(59 130 246 / 0.45);
+}
+
+.gallery-stack__cards {
+  position: relative;
+  width: var(--card-w);
+  height: calc((var(--card-w) * 10) / 16 + 96px);
+  perspective: 1000px;
+  perspective-origin: center 60%;
+  touch-action: pan-y;
+}
+
+.gallery-stack__card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--card-w);
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid rgb(226 232 240);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 14px 34px -16px rgb(15 23 42 / 0.7);
+  transform-origin: center center;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.dark .gallery-stack__card {
+  border-color: rgb(51 65 85);
+  background: rgb(30 41 59);
+  box-shadow: 0 14px 34px -16px rgb(0 0 0 / 0.9);
+}
+
+/* Kartu yang sedang aktif boleh diklik; sisanya tidak. `pointer-events` ikut
+   disables drag Selection di atas foto. */
+.gallery-stack__card.is-active {
+  border-color: rgb(191 219 254);
+}
+
+.gallery-stack__card.is-active img {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-stack__card {
+    will-change: auto;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KARTU GALERI — HOVER
+   ═══════════════════════════════════════════════════════════════════════════
+   Yang membesar saat hover adalah KARTUNYA, bukan fotonya. Foto ikut naik
+   karena ia anak kartu — jadi keduanya bergerak sebagai satu benda utuh,
+   bukan foto yang meleset keluar dari bingkainya.
+
+   Sulitnya: transform kipas tiap kartu (`translateX` + `rotate`) dikirim
+   lewat inline `style`, dan inline style SELALU mengalahkan class CSS. Kalau
+   `group-hover:scale-*` ditaruh di situ, transform kipas ikut tertimpa dan
+   seluruh tumpukan kartu ikut bergeser. Jadi transform kipas dipindah ke
+   custom property, dan `scale` dikalikan di CSS lewat `var()` — keduanya
+   tinggal satu deklarasi, tidak saling menimpa.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.gallery-card {
+  transform:
+    translate(-50%, -50%)
+    translateX(var(--fan-x, 0%))
+    rotate(var(--fan-r, 0deg))
+    scale(var(--fan-s, 1));
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease;
+}
+
+.group:hover .gallery-card,
+.group:focus-visible .gallery-card {
+  --fan-s: 1.035;
+  box-shadow: 0 22px 48px -18px rgba(15, 23, 42, 0.75);
+}
+
+.dark .group:hover .gallery-card,
+.dark .group:focus-visible .gallery-card {
+  box-shadow: 0 22px 48px -18px rgba(0, 0, 0, 0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-card {
+    transition: box-shadow 0.15s linear;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKELETON GALERI
+   ═══════════════════════════════════════════════════════════════════════════
+   Pengganti spinner untuk pratinjau galeri. Bentuknya bukan "kotak abu-abu
+   generik" — dia meniru kartu foto bertumpuk itu persis: ukuran, radius,
+   border, bayangan, dan transform-nya sama, sehingga begitu fotonya siap dia
+   mengisi tempat yang persis sama. Nol lompatan layout.
+
+   Cara kerjanya satu blok warna solid + satu sapuan highlight (bukan
+   `filter: blur()`, bukan drop-shadow mahal): background digeser lewat
+   `background-position` pada layer yang sama, jadi browser cukup
+   me-repaint satu gradien kecil.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.gallery-skeleton {
+  position: absolute;
+  inset: 0;
+  background-color: #e2e8f0;
+  background-image: linear-gradient(
+    100deg,
+    rgb(255 255 255 / 0) 20%,
+    rgb(255 255 255 / 0.75) 50%,
+    rgb(255 255 255 / 0) 80%
+  );
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  animation: galleryShimmer 1.7s linear infinite;
+}
+
+.dark .gallery-skeleton {
+  background-color: #1e293b;
+  background-image: linear-gradient(
+    100deg,
+    rgb(255 255 255 / 0) 20%,
+    rgb(255 255 255 / 0.09) 50%,
+    rgb(255 255 255 / 0) 80%
+  );
+}
+
+@keyframes galleryShimmer {
+  from { background-position: 150% 0; }
+  to   { background-position: -50% 0; }
+}
+
+/* Foto yang sudah siap: masuk dengan fade pendek. `opacity` + `transform`
+   murni, jadi dikomposit di GPU dan tidak memicu layout. */
+.gallery-photo {
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+.gallery-photo.is-ready {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-skeleton {
+    animation: none;
+    background-image: none;
+  }
+  .gallery-photo {
+    transition: opacity 0.15s linear;
+  }
+}

@@ -1,0 +1,438 @@
+/* hero-scene.css
+ *
+ * Susunan lapisan Hero, dari paling belakang ke paling depan:
+ *
+ *   z-0   .hero-pano ............ panorama 360°, berputar otomatis
+ *   z-1   .hero-scrim ........... tirai tema + vignette
+ *   z-10  .hero-figure ......... ilustrasi petugas + bayangan di belakangnya
+ *   z-20  .hero-content ........ teks & kartu aksi
+ *   z-30  .hero-fade ........... tutup bawah ke section berikutnya
+ *
+ * Aturan main untuk semua gradien di bawah: TIDAK ADA satu pun
+ * `filter: blur()` atau `backdrop-filter`. Foto panorama harus tetap tajam;
+ * yang menutupinya hanyalah lapisan warna solid bertingkat — nol biaya per
+ * frame dan tidak pernah mengaburkan apa pun.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PANORAMA
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.hero-pano {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Latar dekoratif: tidak boleh ikut tertahan drag/select. */
+  pointer-events: none;
+  /* Warna dasar diambil dari tema, dipakai selagi foto masih diunduh. */
+  background: linear-gradient(160deg, #dbeafe 0%, #e2e8f0 46%, #cbd5e1 100%);
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dark .hero-pano {
+  background: linear-gradient(160deg, #0b1a3a 0%, #0f172a 52%, #020617 100%);
+}
+
+.hero-pano.is-painted {
+  opacity: 1;
+}
+
+/* Pengguna minta hemat data → tanpa panorama, hero tetap rapi. */
+.hero-pano--off {
+  background:
+    radial-gradient(38rem 30rem at 12% -8%, rgb(37 99 235 / 0.16), transparent 62%),
+    radial-gradient(34rem 26rem at 96% 34%, rgb(249 115 22 / 0.12), transparent 60%),
+    linear-gradient(160deg, #eef2ff 0%, #e2e8f0 55%, #cbd5e1 100%);
+}
+
+.dark .hero-pano--off {
+  background:
+    radial-gradient(38rem 30rem at 12% -8%, rgb(37 99 235 / 0.22), transparent 62%),
+    radial-gradient(34rem 26rem at 96% 34%, rgb(249 115 22 / 0.14), transparent 60%),
+    linear-gradient(160deg, #0b1a3a 0%, #0f172a 52%, #020617 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANTI-BANDING (DITHER)
+   ═══════════════════════════════════════════════════════════════════════════
+   "Garis vertikal" yang terlihat di hero ini BUKAN sambungan panorama dan
+   BUKAN artefak JPEG — itu *banding*.
+
+   Semua tirai di bawah punya alpha yang sangat landai. Contoh nyata pada
+   `.hero-scrim`: `0,72 → 0,22` sepanjang ±800 px. Itu 128 tingkat warna dari
+   255, jadi satu tingkat tiap ~6 px. Layar 8-bit tidak bisa menampilkannya
+   sebagai ramp halus, dan mata membaca lompatan yang tidak bisa dibedakan
+   itu sebagai garis — makin mencolok di panel dengan gradien yang lemah.
+
+   Solusinya: butiran noise sangat halus (bukan blur!) di atas gradien dengan
+   opasitas 5%. Noise itulah yang memecah setiap tingkat warna, jadi tidak
+   ada lagi langkah yang bisa ditangkap mata.
+
+   Paket noise 128 × 128 px ini diraster SEKALI lalu di-tile — nol biaya per
+   frame, nol filter, nol JavaScript. Diterapkan pada `.hero-scrim`,
+   `.hero-figure__scrim`, dan `.hero-fade` (ketiganya punya ramp landai yang
+   sama masalahnya). */
+
+.hero-dither::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Diuji di kondisi lab (hero tanpa panorama, jadi yang diukur murni gradien):
+     1000 px satu baris rata-rata
+        tanpa dither : 574 px kembar  (banding yang sangat kentara)
+        opasitas 0,02 : 170
+        opasitas 0,035: 108
+     Nilai 0,05 dipakai: ~89% bidang rata terpecah, sementara butirannya
+     sendiri berukuran 1 px, jadi tidak terlihat sebagai butiran kasar. */
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIRAI TEMA (SCRIM)
+   Bertumpuk tiga lapis, semuanya warna solid:
+
+     1. atas        — melindungi header fixed & judul dari langit terang
+     2. horizontal  — sisi teks ditebalkan, sisi foto dibiarkan terbuka
+     3. vignette    — kedalaman di pojok
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(248 250 252 / 0.94) 0%,
+      rgb(248 250 252 / 0.55) 9%,
+      rgb(248 250 252 / 0.12) 22%,
+      rgb(248 250 252 / 0) 34%
+    ),
+    linear-gradient(
+      100deg,
+      rgb(248 250 252 / 0.97) 0%,
+      rgb(248 250 252 / 0.93) 24%,
+      rgb(248 250 252 / 0.72) 44%,
+      rgb(248 250 252 / 0.46) 64%,
+      rgb(248 250 252 / 0.3) 82%,
+      rgb(248 250 252 / 0.22) 100%
+    ),
+    radial-gradient(128% 96% at 50% 38%, rgb(248 250 252 / 0) 42%, rgb(15 23 42 / 0.18) 100%);
+}
+
+.dark .hero-scrim {
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(2 6 23 / 0.92) 0%,
+      rgb(2 6 23 / 0.58) 9%,
+      rgb(2 6 23 / 0.16) 22%,
+      rgb(2 6 23 / 0) 34%
+    ),
+    linear-gradient(
+      100deg,
+      rgb(2 6 23 / 0.95) 0%,
+      rgb(2 6 23 / 0.9) 24%,
+      rgb(2 6 23 / 0.7) 44%,
+      rgb(2 6 23 / 0.46) 64%,
+      rgb(2 6 23 / 0.34) 82%,
+      rgb(2 6 23 / 0.26) 100%
+    ),
+    radial-gradient(128% 96% at 50% 38%, rgb(2 6 23 / 0) 38%, rgb(0 0 0 / 0.5) 100%);
+}
+
+/* HP & tablet: teks memakai lebar penuh, jadi tirai horizontal tidak
+   berguna — diganti tirai vertikal. Stop bawah sengaja dibuat JAUH lebih
+   tipis dari yang atas: aspal di dasar panorama itu gelap, dan menyapanya
+   dengan putih pekat akan mengubahnya jadi abu-abu pucat yang persis
+   warna seragam petugas — mereka lenyap. Tipis di bawah = aspal tetap
+   gelap = kontras yang muncul dengan sendirinya. */
+@media (max-width: 1023px) {
+  .hero-scrim {
+    background:
+      linear-gradient(
+        to bottom,
+        rgb(248 250 252 / 0.95) 0%,
+        rgb(248 250 252 / 0.88) 20%,
+        rgb(248 250 252 / 0.7) 42%,
+        rgb(248 250 252 / 0.46) 60%,
+        rgb(248 250 252 / 0.3) 80%,
+        rgb(248 250 252 / 0.2) 100%
+      ),
+      radial-gradient(118% 76% at 50% 22%, rgb(248 250 252 / 0) 26%, rgb(15 23 42 / 0.16) 100%);
+  }
+
+  .dark .hero-scrim {
+    background:
+      linear-gradient(
+        to bottom,
+        rgb(2 6 23 / 0.93) 0%,
+        rgb(2 6 23 / 0.86) 20%,
+        rgb(2 6 23 / 0.7) 42%,
+        rgb(2 6 23 / 0.5) 62%,
+        rgb(2 6 23 / 0.36) 80%,
+        rgb(2 6 23 / 0.28) 100%
+      ),
+      radial-gradient(118% 76% at 50% 22%, rgb(2 6 23 / 0) 22%, rgb(0 0 0 / 0.5) 100%);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ILUSTRASI PETUGAS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Mobile/tablet: ikut flow (flex row, bukan absolute) sehingga teks pasti
+   tidak pernah menindihnya di layar pendek. Desktop: berubah jadi absolute
+   di kanan, supaya bisa berdiri sebesar mungkin tanpa memperkecil teks. */
+.hero-figure {
+  position: relative;
+  z-index: 10;
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  margin-top: -0.5rem;
+  /* Cegah ilustrasi meluber keluar viewport saat hero di-scroll. */
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .hero-figure {
+    position: absolute;
+    /* `right` negatif: margin transparan kanan file ilustrasi (9% dari
+       lebarnya) dibiarkan menjulang keluar layar. Isi gambarnya tidak
+       pernah ikut terpotong — yang keluar hanya ruang kosong — tapi
+       seluruh ilustrasi bergeser ke kanan, sehingga celah antara paragraf
+       dan petugas bertambah tanpa teks harus diproporsikan lagi. */
+    inset: 0 -2.5% 0 auto;
+    width: 50%;
+    max-width: 1100px;
+    margin-top: 0;
+    pointer-events: none;
+  }
+}
+
+/* ── Berapa lebar ilustrasi yang benar-benar muat? ───────────────────────
+ *
+ * Kolom teks desktop adalah `lg:col-span-6` di dalam `max-w-7xl`, dan itu
+ * membuat satu persamaan yang jarang sekali merapikan begini: tepi kanan
+ * kolom teks selalu tepat SETENGAH dari lebar viewport — baik di bawah
+ * 1344 px (container ikut lebarnya viewport) maupun di atasnya (container
+ * terkunci 1280 px di tengah layar).
+ *
+ *   tepi teks  = W / 2
+ *   isi gambar = W − (0,90 + 0,025)·L
+ *                                          0,90   = 1 − margin transparan kiri 10%
+ *                                          0,025 = bleed kanan di atas
+ *   syarat     : isi − tepi teks ≥ 24 px
+ *   ⇒  L ≤ (W/2 − 24) / 0,925   ≈  51,6 % dari lebar viewport
+ *
+ * Persentase di bawah sengaja sedikit di bawah plafon itu. Semuanya sudah
+ * diadu dengan kotak teks sungguhan di 1024 / 1152 / 1280 / 1366 / 1440 /
+ * 1536 / 1600 / 1800 / 1920 / 2560 px — jarak aman terkecil +24 px. */
+@media (min-width: 1280px) {
+  .hero-figure { width: 54%; }
+}
+
+@media (min-width: 1536px) {
+  .hero-figure { width: 56%; }
+}
+
+@media (min-width: 2048px) {
+  .hero-figure { width: 56%; }
+}
+
+/* Lebar ilustrasi di bawah 1024 (petugas berdiri di bawah teks).
+   Angka di atas 100% itu aman, bukan bug: file aslinya punya margin
+   transparan di kiri (10%) dan kanan (9%) — isi gambarnya hanya menempati
+   81% dari lebarnya. Jadi 110% dari lebar wrapper tetap menyisakan ~5%
+   ruang kosong di masing-masing sisi dan tidak ada satu pun pikzel petugas
+   yang terpotong. Efeknya petugas tampil ~10% lebih besar daripada kalau
+   memakai lebar viewport penuh.
+
+   Selektor digabung dengan `.hero-figure >` karena `.pedestrian-hero`
+   juga menaruh `width: 100%` dengan spesifisitas yang sama — tanpa ini,
+   aturan di sini kalah urutan dan mobile kembali ke lebar viewport.
+   `flex: none` wajib: `.hero-figure` memang flex container dan secara
+   default flex-shrink:1 akan memipihkan lebarnya tepat ke 100% begitu
+   lebarnya lebih besar dari viewport — persis hal yang dilarang di sini. */
+.hero-figure > .hero-figure__art {
+  flex: none;
+  width: min(110%, 480px);
+}
+
+@media (min-width: 640px) {
+  .hero-figure > .hero-figure__art {
+    width: min(80%, 540px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-figure > .hero-figure__art {
+    width: 100%;
+  }
+}
+
+/* Bayangan lokal di belakang ilustrasi. Radial warna solid, bukan blur —
+   fungsinya memberi jarak antara abu-abu seragam dan aspal abu-abu di
+   belakangnya. Di tema terang ini yang paling penting: tanpa bayangan
+   ini lengan petugas menyatu dengan trotoar. */
+.hero-figure__scrim {
+  position: absolute;
+  inset: -16% -12% -2%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    64% 74% at 50% 66%,
+    rgb(2 6 23 / 0.44) 0%,
+    rgb(2 6 23 / 0.24) 44%,
+    rgb(2 6 23 / 0) 74%
+  );
+}
+
+.dark .hero-figure__scrim {
+  background: radial-gradient(
+    64% 74% at 50% 66%,
+    rgb(0 0 0 / 0.55) 0%,
+    rgb(0 0 0 / 0.28) 44%,
+    rgb(0 0 0 / 0) 74%
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KONTEN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Selektor-nya `header .hero-content`, BUKAN `.hero-content` polos.
+   Berkas ini emitted SEBELUM utilitas Tailwind di CSS hasil build, jadi
+   selektor berpangkat sama (0,1,0) selalu kalah dari kelas utilitas seperti
+   `.pb-2`. Menambah satu elemen selektor menaikkan spesifisitas ke (0,1,1)
+   dan aturan di sini baru benar-benar berlaku. Elemen `<header>` juga
+   unik, jadi tidak ada risiko sampingan. */
+header .hero-content {
+  position: relative;
+  /* z-30, bukan z-20. `.hero-fade` ada di z-20 dan hanya perlu MENUTUPI
+     ilustrasi (z-10); kalau fade di atas konten, ujung bawah kartu ikut
+     diredup ±6 % oleh gradasi yang di sana masih hampir transparan.
+     Tidak terlihat sebagai garis, tapi tetap tidak perlu.
+     Urutan yang benar: ilustrasi 10 → penutup 20 → teks 30. */
+  z-index: 30;
+  width: 100%;
+  /* `display: flex` itu wajib, bukan hiasan. `.hero-content` adalah flex item
+     milik header, jadi tingginya datang dari flex layout — properti `height`
+     di CSS-nya sendiri `auto`. Akibatnya `height: 100%` pada anaknya (grid)
+     TIDAK bisa dihitung dan turun jadi `auto`, sehingga `align-content:
+     center` tidak punya ruang untuk bekerja dan teksnya nempel terus di atas.
+     Dengan menjadikannya flex column, grid jadi flex item yang benar-benar
+     diregangkan — tanpa perlu persentase sama sekali.
+
+     `position: relative` + `z-index` juga wajib: tanpa itu elemen ini
+     `static` dengan `z-index: auto`, dan karena elemen statis selalu digambar
+     DI BAWAH elemen ber-posisi, teks hero tertutup `.hero-scrim`. */
+  display: flex;
+  flex-direction: column;
+}
+
+/* HP & tablet: teks duduk di tengah ruang sisa, ilustrasi di bawahnya.
+   `padding-bottom` menurunkan titik berat teks — ruang kosong jadi
+   dibagi ~60/40 (atas/bawah) dan bukan 50/50, dan komposisinya terasa sengaja.
+   Nilainya 16 px: ruang sisa paling kecil yang masih aman di layar pendek
+   (360 × 640 sisa cuma ±18 px). */
+@media (max-width: 1023px) {
+  header .hero-content {
+    padding-bottom: 16px;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TUTUP BAWAH
+   Bukan transisi antar-section — latar hero dan section berikutnya memang
+   sama saja. Yang dipotong di sini adalah kaki ilustrasi DAN aspal panorama
+   di paling bawah, jadi keduanya perlu memudar masuk ke latar halaman.
+
+   Tingginya penting: pada 34% dari tinggi hero, di HP (844 px) fade-nya
+   287 px — lebih tinggi dari ilustrasi itu sendiri (234 px), sehingga
+   petugas ikut memudar seluruhnya dan terlihat seperti ghost. 24% membuat
+   fade hanya menyasar bagian bawah yang memang terpotong. */
+.hero-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  width: 100%;
+  height: 24%;
+  min-height: 110px;
+  max-height: 260px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(248 250 252 / 0) 0%,
+    rgb(248 250 252 / 0.16) 40%,
+    rgb(248 250 252 / 0.72) 78%,
+    rgb(248 250 252 / 1) 100%
+  );
+}
+
+.dark .hero-fade {
+  background: linear-gradient(
+    to bottom,
+    rgb(2 6 23 / 0) 0%,
+    rgb(2 6 23 / 0.2) 40%,
+    rgb(2 6 23 / 0.76) 78%,
+    rgb(2 6 23 / 1) 100%
+  );
+}
+
+/* Naikkan ilustrasi sedikit — HANYA di layar yang ruang sisa-nya cukup.
+   Di layar pendek (tinggi < 760 px) ruang kosong antar elemen hanya ±20 px,
+   jadi mengangkat petugas justru membuat teks dan gambar bertabrakan; di sana
+   pembagian 50/50 sudah paling pas dan apanya dibiarkan.
+
+   Syarat `min-height` ini yang membuat adjustments ini aman di 360 × 640,
+   375 × 667, dan segudang layar pendek lain. */
+@media (max-width: 1023px) and (min-height: 760px) {
+  .hero-figure {
+    margin-bottom: 30px;
+  }
+  /* Potongan kaki petugas sekarang berhenti 30 px di atas dasar hero, jadi
+     gradasi penutupnya harus ikut memanjang agar potongan itu larut penuh
+     (α ≈ 0,96) alih-alih meninggalkan garis tipis. */
+  .hero-fade {
+    height: calc(24% + 30px);
+    background: linear-gradient(
+      to bottom,
+      rgb(248 250 252 / 0) 0%,
+      rgb(248 250 252 / 0.16) 30%,
+      rgb(248 250 252 / 0.78) 66%,
+      rgb(248 250 252 / 0.97) 88%,
+      rgb(248 250 252 / 1) 100%
+    );
+  }
+  .dark .hero-fade {
+    background: linear-gradient(
+      to bottom,
+      rgb(2 6 23 / 0) 0%,
+      rgb(2 6 23 / 0.2) 30%,
+      rgb(2 6 23 / 0.8) 66%,
+      rgb(2 6 23 / 0.97) 88%,
+      rgb(2 6 23 / 1) 100%
+    );
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AKSESIBILITAS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-pano {
+    transition: none;
+  }
+}

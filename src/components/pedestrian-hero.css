@@ -1,0 +1,155 @@
+/* pedestrian-hero.css
+ *
+ * Gaya untuk ilustrasi petugas di Hero.
+ *
+ * Aturan main: apa pun yang BERGERAK di sini hanya memakai `transform` dan
+ * `opacity`, supaya bisa dikomposit di GPU dan tidak memicu layout/repaint.
+ * Elemen yang hanya `gradient` (glow, bayangan tanah) justru SENGAJA diam:
+ * grace seperti itu dipanggang sekali ke dalam layer dan tidak menggambar
+ * ulang tiap frame.
+ *
+ * Gerak LOS (gambar) sama sekali tidak ada di sini — file WebP animasi
+ * diputar oleh browser, bukan JavaScript.
+ */
+
+.pedestrian-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Panggung ─────────────────────────────────────────────────────────── */
+
+/* Glow lembut di belakang badan, mengikuti tema. Lebar, tapi statis. */
+.pedestrian-hero__glow {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  z-index: -1;
+  width: 86%;
+  max-width: 560px;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, 22%);
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgb(99 102 241 / 0.18),
+    transparent 72%
+  );
+}
+
+.dark .pedestrian-hero__glow {
+  background: radial-gradient(
+    closest-side,
+    rgb(96 165 250 / 0.22),
+    transparent 72%
+  );
+}
+
+/* Bayangan tanah: ellipse tipis di bawah kaki, memberi kesan berdiri di panggung. */
+.pedestrian-hero__shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 1%;
+  z-index: -1;
+  width: 62%;
+  max-width: 420px;
+  height: 26px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(15 23 42 / 0.14), transparent 78%);
+}
+
+.dark .pedestrian-hero__shadow {
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.45), transparent 78%);
+}
+
+/* ── Partikel cahaya ──────────────────────────────────────────────────── */
+
+.pedestrian-hero__motes {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.pedestrian-hero__mote {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  border-radius: 9999px;
+  background: rgb(251 191 36 / 0.7);
+  will-change: transform, opacity;
+  animation-name: ph-mote;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.dark .pedestrian-hero__mote {
+  background: rgb(186 230 253 / 0.6);
+}
+
+@keyframes ph-mote {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.6);
+  }
+  15% {
+    opacity: 0.7;
+  }
+  85% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(18px, -58vh, 0) scale(1.2);
+  }
+}
+
+/* ── Figur petugas ────────────────────────────────────────────────────── */
+
+.pedestrian-hero__figure {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  /* object-fit 'contain' + tinggi penuh: gambar selalu utuh, tidak terpotong. */
+  object-fit: contain;
+  object-position: center bottom;
+  /* Gambar vektor berkalibrasi ulang: filter zoom TIDAK dipakai di sini —
+     upscale butuh piksel yang tidak ada, hasilnya softness, bukan ketajaman.
+     Ketajaman yang dikejar lewat resolusi (lihat hero-scene.css + aturan
+     `width` di bawah), bukan lewat filter. */
+  image-rendering: auto;
+  opacity: 0;
+  transform: translateY(10px) scale(0.99);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pedestrian-hero__figure.is-painted {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Aksesibilitas ────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .pedestrian-hero__mote {
+    animation: none;
+    opacity: 0;
+  }
+
+  .pedestrian-hero__figure {
+    transform: none;
+    transition: opacity 0.2s linear;
+  }
+}

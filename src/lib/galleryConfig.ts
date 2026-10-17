@@ -1,0 +1,2 @@
+export const GALLERY_PUBLIC_LIMIT = 60;
+export const GALLERY_RESERVE_LIMIT = 50;
