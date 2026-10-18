@@ -1,33 +1,17 @@
 # System checks and debugging
 
-Node.js 22.6 or newer is required. Install the browser once before running UI
-tests:
-
-```bash
-npm install
-npx playwright install chromium
-```
+Node.js 22.6 or newer is required.
 
 ## Checks
 
 ```bash
 npm run check          # TypeScript lint, unit tests, and unused-code audit
 npm run build          # Typecheck and production bundle
-npm run test:ui        # Browser flows, responsive layouts, and screenshots
 npm run check:all      # All of the above in sequence
 ```
 
-`test:ui` starts the Vite development server itself. It does not submit real
-complaints, ratings, or gallery requests: those feature tests use mock API
-responses so they are safe to repeat without Firebase, Cloudinary, or Google
-credentials.
-
-The browser suite checks:
-
-- 320, 360, and 390 px mobile layouts; 768 px tablet; 1280 and 1920 px desktop.
-- Horizontal overflow, initial page rendering, mobile navigation, and theme toggle.
-- Complaint submission and ticket tracking, rating submission, and gallery lightbox.
-- Uncaught browser JavaScript errors.
+The unit tests (`npm test`) run offline: no browser, no credentials, no network
+requests to production. They cover the pure helper modules under `scripts/`.
 
 ## Smoke-test a running deployment
 
@@ -42,15 +26,14 @@ The smoke check verifies SPA routes, JavaScript/CSS entry assets, and safe API
 validation responses. It does not create data or read credentials. Set
 `CHECK_BASE_URL` instead of passing `--base-url` to use a different server.
 
-## Failure artifacts
-
-On browser test failure, Playwright records screenshots, video, and a trace
-under `test-results/`. Open the detailed HTML report with:
+## Maintainer scripts
 
 ```bash
-npx playwright show-report playwright-report
-npx playwright show-trace test-results/<test-folder>/trace.zip
+npm run build:gallery-index   # butuh akses Google Sheets, Drive, dan Firebase
+npm run build:hero-anim -- ./pedestrian.lottie  # butuh unzip dan ffmpeg
+npm run verify:dates           # cek tanggal laporan pada API + kredensial Sheets
 ```
 
-Artifacts contain rendered page data. Review them before sharing or attaching
-them to an external issue.
+Semua skrip memakai TypeScript `.mts` dan dijalankan lewat Node.js
+(`node --experimental-strip-types`). Folder `scripts/` tidak ikut ter-deploy ke
+Vercel (lihat `.vercelignore`).

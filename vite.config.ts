@@ -43,13 +43,16 @@ function loadEnv() {
 
 loadEnv();
 
-// Gunakan URL Vercel bila URL domain khusus belum diatur. Di lokal, localhost
-// tetap menjadi fallback agar metadata development tidak menunjuk domain asing.
+// URL kanonik untuk metadata (sitemap, robots, Open Graph). Urutan:
+// VITE_SITE_URL → domain deployment Vercel → domain produksi. Tidak ada
+// fallback localhost: kalau sampai dipakai di build produksi, metadata akan
+// menunjuk alamat yang tidak pernah ada di internet.
 const vercelHost = process.env.VERCEL_ENV === 'production'
   ? process.env.VERCEL_PROJECT_PRODUCTION_URL
   : process.env.VERCEL_URL;
 const deploymentUrl = vercelHost ? `https://${vercelHost}` : '';
-process.env.VITE_SITE_URL = (process.env.VITE_SITE_URL || deploymentUrl || 'http://localhost:3001').replace(/\/+$/, '');
+const PROD_SITE_URL = 'https://sapapedestrian.vercel.app';
+process.env.VITE_SITE_URL = (process.env.VITE_SITE_URL || deploymentUrl || PROD_SITE_URL).replace(/\/+$/, '');
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 
@@ -239,11 +242,11 @@ function localApiPlugin(): Plugin {
 /**
  * Tulis robots.txt & sitemap.xml saat build memakai VITE_SITE_URL.
  *
- * Tanpa ini kedua file tersebut berisi "http://localhost:3001" — mesin pencari
- * akan mengindeks alamat yang tidak pernah ada di internet.
+ * Tanpa ini kedua file tersebut bisa berisi alamat development — mesin
+ * pencari akan mengindeks URL yang tidak pernah ada di internet.
  */
 function siteMetaPlugin(): Plugin {
-  const siteUrl = process.env.VITE_SITE_URL || 'http://localhost:3001';
+  const siteUrl = process.env.VITE_SITE_URL || PROD_SITE_URL;
   const lastmod = new Date().toISOString().slice(0, 10);
 
   const robots = [
@@ -310,11 +313,14 @@ export default defineConfig({
   },
 
   server: {
+    // Port tetap: dipakai juga oleh halaman pembungkus & dokumentasi lokal.
+    // strictPort mencegah Vite diam-diam pindah port (iframe jadi rusak).
     port: 3001,
-    strictPort: false,
+    strictPort: true,
   },
   preview: {
     port: 3001,
+    strictPort: true,
   },
   build: {
     outDir: 'dist',

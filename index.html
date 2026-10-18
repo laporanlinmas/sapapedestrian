@@ -121,14 +121,21 @@
       }
     </script>
 
-    <!-- Dark Mode Anti-Flash Script -->
+    <!-- Dark Mode Anti-Flash Script
+         Urutan: ?theme= (dari halaman induk saat di-embed) → simpanan lokal →
+         prefers-color-scheme. Tanpa ?theme=, portal yang dibungkus dashboard
+         atau index.html akan sempat menampilkan tema yang salah. -->
     <script>
       (function() {
         try {
-          var t = localStorage.getItem('theme');
-          if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-          }
+          var q = new URLSearchParams(window.location.search).get('theme');
+          var saved = localStorage.getItem('theme') || localStorage.getItem('sipedas_theme');
+          var sys = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          var t = (q === 'dark' || q === 'light') ? q
+                : ((saved === 'dark' || saved === 'light') ? saved : sys);
+          var root = document.documentElement;
+          root.classList.toggle('dark', t === 'dark');
+          root.style.colorScheme = t;
         } catch (e) {}
       })();
     </script>

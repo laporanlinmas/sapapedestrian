@@ -5,12 +5,9 @@
 node_modules/
 dist/
 coverage/
-playwright-report/
-test-results/
 scripts/
 tests/
 *.test.*
-*.spec.*
 *.lottie
 *.map
 *.log
