@@ -5,14 +5,12 @@ import { Images, ArrowRight } from 'lucide-react';
 import { useGalleryFeed } from '@/lib/useGalleryFeed';
 import { protectImages } from '@/lib/galleryGuard';
 import SectionLabel from '@/components/SectionLabel';
-import GalleryStackSkeleton from '@/components/GalleryStackSkeleton';
 
-/* `motion` (tumpukan kartu) bernilai ±87 KB gzip. Section ini ada di bawah
+/* `motion` (accordion foto) bernilai ±87 KB gzip. Section ini ada di bawah
  * lipatan, jadi tidak boleh ikut masuk critical path. Dimuat saat section
- * mendekati layar; sebelum itu `GalleryStackSkeleton` (tanpa motion) mengisi
- * tempatnya dengan geometri yang persis sama. */
-const ScrollableCardStack = lazy(() => import('@/components/ScrollableCardStack'));
-type CardItem = import('@/components/ScrollableCardStack').CardItem;
+ * mendekati layar; sebelum itu skeleton tanpa motion mengisi tempatnya. */
+const HoverExpand = lazy(() => import('@/components/ui/hover-expand'));
+type HoverExpandItem = import('@/components/ui/hover-expand').HoverExpandItem;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -40,13 +38,26 @@ type CardItem = import('@/components/ScrollableCardStack').CardItem;
 
 const PREVIEW = 5;
 
-/* Lebar kartu tumpukan — diteruskan ke skeleton DAN ke modul aslinya.
- * 440 px supaya terasa substansial di laptop/desktop, sementara di HP
- * `--card-w` tetap turun ke `100vw − 2rem` dan tidak pernah meluber. */
-const CARD_W = 440;
-
-/** Logo yang mewakili sumber laporan di baris bawah kartu. */
-const AVATAR = '/assets/satpol.webp';
+function GalleryExpandSkeleton({ count }: { count: number }) {
+  return (
+    <div
+      aria-label="Memuat pratinjau galeri"
+      aria-busy="true"
+      className="mx-auto flex h-[320px] w-full max-w-5xl flex-col gap-2 sm:h-[360px] md:h-[420px] md:flex-row"
+      role="status"
+    >
+      {Array.from({ length: count }, (_, index) => (
+        <div
+          aria-hidden="true"
+          className={`min-h-0 min-w-0 flex-1 overflow-hidden rounded-xl border border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800 ${index === 0 ? 'flex-[4]' : ''}`}
+          key={index}
+        >
+          <div className="gallery-skeleton h-full w-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function GallerySection({ onOpenPage }: { onOpenPage: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -97,12 +108,11 @@ export default function GallerySection({ onOpenPage }: { onOpenPage: () => void 
   // Hook mengambil satu halaman (12 foto); di beranda cukup 5.
   const items = feed.items.slice(0, PREVIEW);
 
-  const cards: CardItem[] = items.map((item) => ({
+  const cards: HoverExpandItem[] = items.map((item) => ({
     id: item.id,
     image: item.thumb,
     alt: `Dokumentasi laporan ${item.tanggal}`,
-    name: item.tanggal,
-    avatar: AVATAR,
+    title: item.tanggal,
   }));
 
   const tampil = loading || items.length > 0;
@@ -144,23 +154,16 @@ export default function GallerySection({ onOpenPage }: { onOpenPage: () => void 
 
         {tampil && (
           <>
-            {/* Fallback-nya skeleton, bukan spinner, dan berasal dari modul yang
-                sama dengan tumpukan aslinya (`GalleryStackSkeleton` dipakai
-                oleh `ScrollableCardStack` juga) — jadi saat modul `motion`
-                selesai diunduh, tidak ada pergeseran satu piksel pun. */}
-            <Suspense fallback={<GalleryStackSkeleton count={PREVIEW} cardWidth={CARD_W} />}>
+            {/* Accordion hanya menampilkan pratinjau; halaman galeri tetap
+                menjadi tempat membuka koleksi penuh dan lightbox. */}
+            <Suspense fallback={<GalleryExpandSkeleton count={PREVIEW} />}>
               {siapStack ? (
-                <ScrollableCardStack
+                <HoverExpand
                   items={cards}
-                  loading={loading}
-                  slotCount={PREVIEW}
-                  cardWidth={CARD_W}
-                  onItemError={onPhotoError}
-                  onSelect={onOpenPage}
-                  label="Galeri kegiatan — tumpukan foto laporan"
+                  onImageError={onPhotoError}
                 />
               ) : (
-                <GalleryStackSkeleton count={PREVIEW} cardWidth={CARD_W} />
+                <GalleryExpandSkeleton count={PREVIEW} />
               )}
             </Suspense>
 

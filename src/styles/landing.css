@@ -71,6 +71,17 @@
     radial-gradient(44rem 30rem at 42% 104%, rgb(245 158 11 / .06), transparent 62%);
 }
 
+.chatbot-message-surface {
+  background-color: #f8fafc;
+  background-image: radial-gradient(#cbd5e1 0.6px, transparent 0.6px);
+  background-size: 14px 14px;
+}
+
+.dark .chatbot-message-surface {
+  background-color: #020617;
+  background-image: radial-gradient(#334155 0.6px, transparent 0.6px);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    KEYFRAME ANIMATIONS
    ═══════════════════════════════════════════════════════════════════════════ */

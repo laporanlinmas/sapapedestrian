@@ -110,11 +110,11 @@ const LOKASI_LIST = [
   'Lokasi Lainnya',
 ];
 
-const STATUS_STYLE: Record<string, { color: string; bg: string; Icon: React.ElementType }> = {
-  'Baru':     { color: '#3b82f6', bg: '#eff6ff', Icon: AlertCircle },
-  'Diproses': { color: '#f59e0b', bg: '#fffbeb', Icon: Clock },
-  'Selesai':  { color: '#10b981', bg: '#ecfdf5', Icon: CheckCircle2 },
-  'Ditolak':  { color: '#ef4444', bg: '#fef2f2', Icon: X },
+const STATUS_STYLE: Record<string, { color: string; badge: string; Icon: React.ElementType }> = {
+  'Baru':     { color: '#3b82f6', badge: 'bg-blue-50 dark:bg-blue-950/50', Icon: AlertCircle },
+  'Diproses': { color: '#f59e0b', badge: 'bg-amber-50 dark:bg-amber-950/40', Icon: Clock },
+  'Selesai':  { color: '#10b981', badge: 'bg-emerald-50 dark:bg-emerald-950/40', Icon: CheckCircle2 },
+  'Ditolak':  { color: '#ef4444', badge: 'bg-red-50 dark:bg-red-950/40', Icon: X },
 };
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
@@ -179,20 +179,20 @@ function TicketCard({ info }: { info: TicketInfo }) {
   const cfg = STATUS_STYLE[info.status] ?? STATUS_STYLE['Baru'];
   const Icon = cfg.Icon;
   return (
-    <div className="mt-3 rounded-xl border border-slate-300 bg-white overflow-hidden shadow-sm">
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border-b border-slate-300">
+    <div className="mt-3 overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <div className="flex items-center justify-between border-b border-slate-300 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
         <span className="font-mono text-[11px] font-bold text-slate-500">{info.ticket}</span>
-        <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-          style={{ background: cfg.bg, color: cfg.color }}>
+        <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${cfg.badge}`}
+          style={{ color: cfg.color }}>
           <Icon size={11} />{info.status}
         </span>
       </div>
-      <div className="p-3 space-y-1.5 text-xs text-slate-600">
+      <div className="space-y-1.5 p-3 text-xs text-slate-600 dark:text-slate-300">
         <div className="flex gap-2"><span className="text-slate-400 w-14 shrink-0">Pelapor</span><span className="font-medium">{info.nama}</span></div>
         <div className="flex gap-2"><span className="text-slate-400 w-14 shrink-0">Lokasi</span><span className="font-medium">{info.lokasi}</span></div>
         <div className="flex gap-2"><span className="text-slate-400 w-14 shrink-0">Hal</span><span className="font-medium italic">"{info.deskripsi}"</span></div>
         {info.catatan && (
-          <div className="mt-1.5 p-2 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 text-[11px]">
+          <div className="mt-1.5 rounded-lg border border-blue-100 bg-blue-50 p-2 text-[11px] text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200">
             <span className="font-bold">Respons petugas:</span> {info.catatan}
             {info.fotoTindakLanjut && (
               <a href={info.fotoTindakLanjut} target="_blank" rel="noopener noreferrer" className="block mt-1.5">
@@ -200,7 +200,7 @@ function TicketCard({ info }: { info: TicketInfo }) {
                   src={info.fotoTindakLanjut}
                   alt="Foto tindak lanjut"
                   loading="lazy"
-                  className="w-14 h-14 rounded-md object-cover border border-blue-100"
+                  className="h-14 w-14 rounded-md border border-blue-100 object-cover dark:border-blue-900"
                 />
               </a>
             )}
@@ -216,7 +216,7 @@ function ActionButtons({ actions, onAction }: { actions: ChatAction[]; onAction:
     <div className="mt-2.5 flex flex-wrap gap-1.5">
       {actions.map((act, i) => (
         <button key={i} onClick={() => onAction(act)}
-          className="flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 shadow-sm transition-all hover:border-blue-400 hover:text-blue-600 active:scale-95">
+          className="flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 shadow-sm transition-all hover:border-blue-400 hover:text-blue-600 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-blue-300">
           {act.icon}{act.label}
           {act.type === 'link' && <ExternalLink size={10} />}
         </button>
@@ -228,17 +228,17 @@ function ActionButtons({ actions, onAction }: { actions: ChatAction[]; onAction:
 interface WaCardProps { name: string; day: string; jadwal: string; waUrl: string; label: string; }
 function WaCard({ name, waUrl }: WaCardProps) {
   return (
-    <div className="mt-3 rounded-xl border border-green-200 bg-green-50 overflow-hidden shadow-sm">
-      <div className="px-3 py-2 border-b border-green-100 flex items-center gap-2">
+    <div className="mt-3 overflow-hidden rounded-xl border border-green-200 bg-green-50 shadow-sm dark:border-green-900 dark:bg-green-950/30">
+      <div className="flex items-center gap-2 border-b border-green-100 px-3 py-2 dark:border-green-900">
         <Phone size={13} className="text-green-600 shrink-0" />
-        <span className="text-[11px] font-bold text-green-800">Petugas Piket Hari Ini</span>
+        <span className="text-[11px] font-bold text-green-800 dark:text-green-200">Petugas Piket Hari Ini</span>
       </div>
-      <div className="p-3 text-xs text-slate-700">
-        <div className="flex gap-2"><span className="text-slate-400 w-14 shrink-0">Nama</span><span className="font-semibold">{name}</span></div>
+      <div className="p-3 text-xs text-slate-700 dark:text-slate-200">
+        <div className="flex gap-2"><span className="w-14 shrink-0 text-slate-400 dark:text-slate-500">Nama</span><span className="font-semibold">{name}</span></div>
       </div>
       <div className="px-3 pb-3">
         <a href={waUrl} target="_blank" rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-2 text-xs font-bold text-white hover:bg-[#1ebe5d] transition-colors">
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-2 text-xs font-bold text-white transition-colors hover:bg-[#1ebe5d]">
           <Phone size={13} />Chat via WhatsApp
         </a>
       </div>
@@ -249,10 +249,10 @@ function WaCard({ name, waUrl }: WaCardProps) {
 function TypingIndicator() {
   return (
     <div className="flex items-start gap-2.5 animate-in fade-in slide-in-from-left-2 duration-300">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
         <Bot size={15} />
       </div>
-      <div className="rounded-2xl rounded-tl-none bg-white border border-slate-300 px-4 py-3 shadow-sm">
+      <div className="rounded-2xl rounded-tl-none border border-slate-300 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div className="flex gap-1.5">
           <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300" style={{ animationDelay: '0ms' }} />
           <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300" style={{ animationDelay: '150ms' }} />
@@ -289,7 +289,10 @@ export default function ChatbotUnified({
   const { ask: askAi, cancel: cancelAi } = useAiChat();
 
   const listRef    = useRef<HTMLDivElement>(null);
+  const panelRef   = useRef<HTMLDivElement>(null);
   const inputRef   = useRef<HTMLTextAreaElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef  = useRef<HTMLInputElement>(null);
   const draftRef   = useRef<ComplaintDraft | null>(null);
@@ -499,6 +502,9 @@ export default function ChatbotUnified({
     if (!overrideText) {
       addMsg('user', text, pendingPhotos.length > 0 ? { photos: [...pendingPhotos] } : undefined);
       setInput('');
+        if (text) {
+          requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
+        }
     }
 
     setIsBusy(true);
@@ -567,7 +573,10 @@ export default function ChatbotUnified({
       // ── Smart routing ───────────────────────────────────────────────────
 
       // CCTV
-      if (/cctv|kamera|pantau|live|camera|monitor|sipedas view/i.test(text)) {
+      if (
+        /^(?:cctv|sipedas view|pantau cctv|lihat cctv)$/i.test(text) ||
+        /\b(?:buka|lihat|melihat|tonton|akses|link|cara melihat|cara lihat)\b.{0,32}\b(?:cctv|kamera|sipedas view)\b|\b(?:cctv|kamera|sipedas view)\b.{0,32}\b(?:buka|lihat|tonton|akses|link)\b/i.test(text)
+      ) {
         addMsg('bot', 'Pantauan CCTV live tersedia di **SIPEDAS VIEW**:', {
           actions: [{ label: 'Buka SIPEDAS VIEW', payload: 'cctv', type: 'route', icon: <MonitorPlay size={13} /> }],
         });
@@ -575,7 +584,10 @@ export default function ChatbotUnified({
       }
 
       // Peta
-      if (/peta|kerawanan|rawan|map|lokasi bahaya|titik rawan/i.test(text)) {
+      if (
+        /^(?:peta|peta kerawanan|mymaps|titik rawan)$/i.test(text) ||
+        /\b(?:buka|lihat|tampilkan|akses|link|lokasi)\b.{0,32}\b(?:peta|kerawanan|titik rawan)\b|\b(?:peta|kerawanan|titik rawan)\b.{0,32}\b(?:buka|lihat|tampilkan|akses|link)\b/i.test(text)
+      ) {
         addMsg('bot', 'Peta kerawanan pedestrian Ponorogo tersedia di **Peta Kerawanan**:', {
           actions: [{ label: 'Buka Peta Kerawanan', payload: 'mymaps', type: 'route', icon: <Map size={13} /> }],
         });
@@ -583,7 +595,7 @@ export default function ChatbotUnified({
       }
 
       // Pengaduan/laporan — arahkan ke section sekaligus tawari flow
-      if (/pengaduan|aduan|laporan|laporkan|komplain/i.test(text)) {
+      if (/\b(?:pengaduan|aduan|laporkan|komplain|buat laporan|kirim laporan)\b/i.test(text)) {
         addMsg('bot', 'Anda bisa membuat laporan langsung lewat form di halaman ini, atau saya bantu proses sekarang:', {
           actions: [
             { label: 'Buka Form Aduan', payload: 'aduan', type: 'panel', icon: <Megaphone size={13} /> },
@@ -594,7 +606,10 @@ export default function ChatbotUnified({
       }
 
       // Galeri foto
-      if (/galeri|gallery|foto kegiatan|dokumentasi/i.test(text)) {
+      if (
+        /^(?:galeri|gallery|foto kegiatan|dokumentasi)$/i.test(text) ||
+        /\b(?:buka|lihat|melihat|tampilkan|akses|link)\b.{0,32}\b(?:galeri|gallery|foto kegiatan|dokumentasi)\b/i.test(text)
+      ) {
         addMsg('bot', 'Dokumentasi kegiatan dapat dibuka di halaman galeri:', {
           actions: [{ label: 'Buka Galeri', payload: 'galeri', type: 'route', icon: <Images size={13} /> }],
         });
@@ -602,7 +617,7 @@ export default function ChatbotUnified({
       }
 
       // Jadwal dan aturan
-      if (/jadwal|piket|jam bertugas|jam operasional|aturan kawasan/i.test(text)) {
+      if (/\b(?:jadwal|piket|jam bertugas|jam operasional|aturan kawasan)\b/i.test(text)) {
         addMsg('bot', 'Berikut jadwal dan aturan program Satgas Linmas:', {
           actions: [{ label: 'Buka Jadwal & Aturan', payload: 'jadwalModal', type: 'modal', icon: <Clock size={13} /> }],
         });
@@ -611,7 +626,7 @@ export default function ChatbotUnified({
 
       // Info program / profil
       if (
-        /program|info|informasi|profil|kegiatan|tentang|sipedas/i.test(text) &&
+        /\b(?:profil|program)\b.{0,32}\b(?:sipedas|satgas|pedestrian)\b|\b(?:tentang|mengenal)\b.{0,32}\b(?:sipedas|satgas|pedestrian)\b|\bapa itu\s+sipedas\b/i.test(text) &&
         !/video|youtube|survei|survey|evaluasi|penilaian|kepuasan|rating|bintang/i.test(text)
       ) {
         addMsg('bot', 'Pilih informasi SIPEDAS yang ingin Anda lihat:', {
@@ -776,6 +791,7 @@ export default function ChatbotUnified({
     <>
       {/* ── Trigger button — lebih kecil ── */}
       <button
+        ref={launcherRef}
         onClick={() => onToggle?.(true)}
         disabled={isOpen || launcherHidden}
         aria-hidden={isOpen || launcherHidden}
@@ -790,15 +806,29 @@ export default function ChatbotUnified({
         <div className="absolute inset-0 animate-ping rounded-full bg-blue-500 opacity-20 pointer-events-none" />
       </button>
 
+      {isOpen && (
+        <button
+          type="button"
+          aria-label="Tutup chatbot dan kembali ke halaman"
+          onClick={() => onToggle?.(false)}
+          className="fixed inset-0 z-[1000] cursor-default bg-slate-950/35 backdrop-blur-[2px] sm:bg-slate-950/20"
+        />
+      )}
+
       {/* ── Chat window ── */}
       <div
-        className={`fixed bottom-0 right-0 z-[1001] flex flex-col overflow-hidden bg-white shadow-[0_20px_60px_rgba(0,0,0,0.25)] transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-          w-full max-h-[85dvh] sm:bottom-5 sm:right-5 sm:h-[680px] sm:max-h-[92vh] sm:w-[400px] sm:rounded-3xl
-          ${isOpen ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-10 opacity-0'}`}
+        ref={panelRef}
+        role="dialog"
+        aria-modal={isOpen}
+        aria-hidden={!isOpen}
+        aria-labelledby="chatbot-title"
+        tabIndex={-1}
+        className={`fixed inset-x-0 bottom-0 z-[1001] flex h-[100dvh] flex-col overflow-hidden bg-white shadow-2xl transition-[opacity,transform,visibility] duration-300 ease-out dark:bg-slate-950 sm:bottom-5 sm:left-auto sm:right-5 sm:h-[min(680px,92vh)] sm:w-[400px] sm:rounded-2xl
+          ${isOpen ? 'visible translate-y-0 opacity-100' : 'invisible pointer-events-none translate-y-4 opacity-0'}`}
       >
 
         {/* Header */}
-        <header className="relative flex shrink-0 items-center gap-3 px-5 py-4 text-white shadow-md" style={{ background: NAV_GRADIENT }}>
+        <header className="relative flex shrink-0 items-center gap-3 px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] text-white shadow-md sm:px-5 sm:py-4" style={{ background: NAV_GRADIENT }}>
           <div className="relative">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 border border-white/20">
               <Bot size={22} />
@@ -806,13 +836,14 @@ export default function ChatbotUnified({
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-blue-700 bg-blue-200" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-sm font-bold leading-tight tracking-tight">SIPEDAS Assistant</h2>
+            <h2 id="chatbot-title" className="text-sm font-bold leading-tight tracking-tight">SIPEDAS Assistant</h2>
             <p className="flex items-center gap-1.5 text-[11px] font-medium text-blue-100 mt-0.5">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-200 shrink-0" />
               Sistem Pelayanan Digital Terpadu
             </p>
           </div>
           <button
+            ref={closeButtonRef}
             onClick={() => onToggle?.(false)}
             className="rounded-lg bg-white/10 p-1.5 transition-colors hover:bg-white/20"
             aria-label="Tutup chatbot"
@@ -824,8 +855,7 @@ export default function ChatbotUnified({
         {/* Message area */}
         <div
           ref={listRef}
-          className="flex-1 overflow-y-auto bg-slate-50 px-4 py-5 space-y-5 custom-scrollbar"
-          style={{ backgroundImage: 'radial-gradient(#e2e8f0 0.5px, transparent 0.5px)', backgroundSize: '14px 14px' }}
+          className="chatbot-message-surface min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-5 custom-scrollbar"
         >
           {messages.map((m, i) => (
             <div key={i}
@@ -833,7 +863,7 @@ export default function ChatbotUnified({
 
               {/* Avatar */}
               <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-xl shadow-sm ${
-                m.role === 'user' ? 'bg-slate-800 text-white' : 'bg-white border border-slate-300 text-blue-600'
+                m.role === 'user' ? 'bg-slate-800 text-white' : 'border border-slate-300 bg-white text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-400'
               }`}>
                 {m.role === 'user' ? <User size={14} /> : <Bot size={14} />}
               </div>
@@ -843,13 +873,13 @@ export default function ChatbotUnified({
                 <div className={`rounded-2xl px-3.5 py-2.5 text-sm shadow-sm ${
                   m.role === 'user'
                     ? 'rounded-tr-none bg-blue-600 text-white'
-                    : 'rounded-tl-none bg-white border border-slate-300 text-slate-800'
+                    : 'rounded-tl-none border border-slate-300 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
                 }`}>
 
                   {m.photos && m.photos.length > 0 && (
                     <div className="mb-2 flex flex-wrap gap-1.5">
                       {m.photos.map((p, pi) => (
-                        <img key={pi} src={p.preview} alt="" className="h-20 w-20 rounded-lg object-cover border border-black/5" />
+                        <img key={pi} src={p.preview} alt="" className="h-20 w-20 rounded-lg border border-black/5 object-cover dark:border-white/10" />
                       ))}
                     </div>
                   )}
@@ -871,7 +901,7 @@ export default function ChatbotUnified({
 
                 {m.actions && !isBusy && <ActionButtons actions={m.actions} onAction={handleAction} />}
 
-                <span className="px-1 text-[10px] text-slate-400">{m.ts}</span>
+                <span className="px-1 text-[10px] text-slate-400 dark:text-slate-500">{m.ts}</span>
               </div>
             </div>
           ))}
@@ -881,7 +911,7 @@ export default function ChatbotUnified({
             <div className="ml-9 flex flex-wrap gap-1.5">
               {KATEGORI_LIST.map(k => (
                 <button key={k} onClick={() => onSend(k)}
-                  className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition-all hover:border-blue-300 hover:text-blue-600">
+                  className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition-all hover:border-blue-300 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-blue-300">
                   {k}
                 </button>
               ))}
@@ -893,7 +923,7 @@ export default function ChatbotUnified({
             <div className="ml-9 flex flex-wrap gap-1.5">
               {LOKASI_LIST.map(l => (
                 <button key={l} onClick={() => onSend(l)}
-                  className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition-all hover:border-blue-300 hover:text-blue-600">
+                  className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition-all hover:border-blue-300 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-blue-300">
                   📍 {l}
                 </button>
               ))}
@@ -905,14 +935,14 @@ export default function ChatbotUnified({
 
 
         {/* Input area — tanpa FAQ/Syarat */}
-        <footer className="shrink-0 border-t border-slate-300 bg-white px-4 py-3 pb-5 sm:pb-3">
+          <footer className="shrink-0 border-t border-slate-300 bg-white px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 dark:border-slate-800 dark:bg-slate-950 sm:px-4 sm:py-3">
 
           {/* Preview foto pending */}
           {pendingPhotos.length > 0 && (
             <div className="mb-3 flex gap-2 overflow-x-auto pb-0.5">
               {pendingPhotos.map((p, i) => (
                 <div key={i} className="relative group shrink-0">
-                  <img src={p.preview} alt="" className="h-14 w-14 rounded-xl object-cover border border-slate-300" />
+                  <img src={p.preview} alt="" className="h-14 w-14 rounded-xl border border-slate-300 object-cover dark:border-slate-700" />
                   <button onClick={() => removePhoto(i)}
                     className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white shadow transition-transform group-hover:scale-110">
                     <Trash2 size={9} />
@@ -921,7 +951,7 @@ export default function ChatbotUnified({
               ))}
               {pendingPhotos.length < 3 && (
                 <button onClick={() => cameraRef.current?.click()}
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-slate-400 hover:border-blue-300 hover:text-blue-500 transition-colors">
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-slate-400 transition-colors hover:border-blue-300 hover:text-blue-500 dark:border-slate-700 dark:text-slate-500">
                   <Camera size={18} />
                 </button>
               )}
@@ -933,12 +963,12 @@ export default function ChatbotUnified({
             <div className="flex gap-1 pb-0.5">
               <button title="Pilih gambar" disabled={isBusy || pendingPhotos.length >= 3}
                 onClick={() => galleryRef.current?.click()}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30">
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200">
                 <ImageIcon size={18} />
               </button>
               <button title="Ambil foto" disabled={isBusy || pendingPhotos.length >= 3}
                 onClick={() => cameraRef.current?.click()}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30">
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200">
                 <Camera size={18} />
               </button>
             </div>
@@ -947,16 +977,17 @@ export default function ChatbotUnified({
             <textarea
               ref={inputRef}
               rows={1}
+              enterKeyHint="send"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(); } }}
               placeholder={activeStep === 'foto' ? 'Ketik "lanjut" atau kirim foto…' : 'Tulis pesan…'}
-              className="flex-1 resize-none rounded-2xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+              className="flex-1 resize-none rounded-2xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-slate-800 dark:focus:ring-blue-950/50"
               style={{ maxHeight: '100px' }}
             />
 
             {/* Send */}
-            <button onClick={() => onSend()}
+            <button type="button" onClick={() => onSend()}
               disabled={isBusy || (!input.trim() && pendingPhotos.length === 0)}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-white shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:scale-100"
               style={{ background: NAV_GRADIENT }}>

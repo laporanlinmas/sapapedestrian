@@ -105,7 +105,7 @@ export default function Footer() {
                 <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
                 Jl. Trunojoyo No.147, Kauman, Kecamatan Ponorogo, Kabupaten Ponorogo, Jawa Timur 63419
               </li>
-              <li className="border-t border-slate-300 pt-2 dark:border-slate-800 sm:pt-3">
+              <li className="pt-1 sm:pt-2">
                 {/* Mobile: "Buka 24 Jam" sendiri di barisnya, lalu di bawahnya
                     satu baris berisi ikon medsos + Satpol PP. Desktop: satu
                     baris seperti semula (jam di kiri, Satpol PP di kanan). */}

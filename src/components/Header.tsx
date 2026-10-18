@@ -86,11 +86,12 @@ export default function Header({ isSurveyPage = false, onBack }: HeaderProps) {
           {/* Pill */}
           <div className={`
             flex items-center justify-between h-14 px-4 sm:px-5 rounded-2xl
-            bg-gradient-to-r from-blue-700/95 via-indigo-700/95 to-purple-700/95
-            dark:from-slate-800/95 dark:to-slate-900/95
+            bg-gradient-to-r from-blue-700/78 via-indigo-700/76 to-purple-700/78
+            dark:from-slate-800/78 dark:via-slate-800/78 dark:to-slate-900/82
             border border-white/15 dark:border-slate-700/40
-            backdrop-blur-sm
-            transition-none
+            backdrop-blur-xl
+            transition-[box-shadow,background-color] duration-300
+            ${scrolled ? 'shadow-lg shadow-slate-950/20' : 'shadow-sm shadow-slate-950/10'}
           `}>
 
             {/* Logo & Judul */}

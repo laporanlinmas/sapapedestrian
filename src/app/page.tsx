@@ -108,29 +108,41 @@ function ChatbotFallback({ opened, onOpen }: { opened: boolean; onOpen: () => vo
   }
 
   return (
-    <div className="fixed bottom-0 right-0 z-[1001] flex h-[85dvh] max-h-[680px] w-full flex-col overflow-hidden bg-white shadow-2xl sm:bottom-5 sm:right-5 sm:h-[680px] sm:max-h-[92vh] sm:w-[400px] sm:rounded-3xl" role="status" aria-label="Memuat chatbot" aria-busy="true">
-      <div className="flex h-[72px] shrink-0 items-center gap-3 bg-blue-700 px-5">
+    <div className="fixed inset-x-0 top-0 z-[1001] flex h-[100dvh] w-full flex-col overflow-hidden bg-white shadow-2xl dark:bg-slate-950 sm:inset-x-auto sm:bottom-5 sm:right-5 sm:top-auto sm:h-[min(680px,92vh)] sm:w-[400px] sm:rounded-2xl" role="status" aria-label="Memuat chatbot" aria-busy="true">
+      <div className="flex h-[72px] shrink-0 items-center gap-3 bg-blue-700 px-5 pt-[env(safe-area-inset-top)] sm:pt-0">
         <span className="h-10 w-10 animate-pulse rounded-xl bg-white/20" />
         <span className="space-y-2"><span className="block h-3 w-32 animate-pulse rounded bg-white/30" /><span className="block h-2 w-40 animate-pulse rounded bg-white/20" /></span>
       </div>
-      <div className="flex-1 space-y-5 bg-slate-50 p-5">
-        <span className="block h-14 w-3/4 animate-pulse rounded-2xl bg-white" />
-        <span className="ml-auto block h-12 w-2/3 animate-pulse rounded-2xl bg-blue-100" />
+      <div className="min-h-0 flex-1 space-y-5 bg-slate-50 p-5 dark:bg-slate-900">
+        <span className="block h-14 w-3/4 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800" />
+        <span className="ml-auto block h-12 w-2/3 animate-pulse rounded-2xl bg-blue-100 dark:bg-blue-950/60" />
       </div>
-      <div className="h-16 shrink-0 border-t border-slate-200 bg-white" />
+      <div className="h-[72px] shrink-0 border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" />
     </div>
   );
 }
 
 function AduanPanelFallback() {
   return (
-    <div className="fixed inset-0 z-[999] bg-slate-900/60 sm:bg-transparent" role="status" aria-label="Memuat formulir aduan" aria-busy="true">
-      <div className="fixed bottom-0 right-0 z-[1000] flex min-h-[480px] max-h-[92dvh] w-full max-w-[440px] flex-col overflow-hidden rounded-t-2xl border border-slate-300 bg-white p-4 shadow-2xl sm:bottom-6 sm:right-6 sm:min-h-[520px] sm:rounded-2xl">
-        <span className="mb-5 h-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
-        <span className="mb-3 h-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
-        <span className="mb-3 h-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
-        <span className="mb-3 h-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
-        <span className="h-28 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+    <div className="fixed inset-0 z-[999] bg-slate-950/55 sm:bg-transparent" role="status" aria-label="Memuat formulir aduan" aria-busy="true">
+      <div className="fixed bottom-0 right-0 z-[1000] flex min-h-[480px] max-h-[92dvh] w-full max-w-[440px] flex-col overflow-hidden rounded-t-2xl border border-slate-300 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 sm:bottom-6 sm:right-6 sm:min-h-[520px] sm:max-h-[min(680px,92vh)] sm:rounded-2xl">
+        <div className="h-1 shrink-0 bg-gradient-to-r from-orange-400 to-red-500" />
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-300 px-3 py-2.5 dark:border-slate-800 sm:px-5 sm:py-3">
+          <div className="flex gap-1.5">
+            <span className="h-8 w-28 animate-pulse rounded-full bg-orange-200 dark:bg-orange-950/70" />
+            <span className="h-8 w-24 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+          </div>
+          <span className="h-8 w-8 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+        </div>
+        <div className="min-h-0 flex-1 space-y-3 overflow-hidden p-4 sm:p-5">
+          <span className="block h-10 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+          <span className="block h-10 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+          <span className="block h-10 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+          <span className="block h-24 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+        </div>
+        <div className="shrink-0 border-t border-slate-300 p-4 dark:border-slate-800 sm:px-5">
+          <span className="block h-10 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+        </div>
       </div>
     </div>
   );
