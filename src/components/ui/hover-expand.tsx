@@ -43,25 +43,16 @@ const HoverExpand = ({
   const isControlled = activeIndexProp !== undefined;
   const activeIndex = isControlled ? activeIndexProp : internalActive;
   const [isHoverDevice, setIsHoverDevice] = useState(false);
-  const [isCompact, setIsCompact] = useState(false);
   const panelRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const isHorizontal = orientation === 'horizontal' && !isCompact;
+  const isHorizontal = orientation === 'horizontal';
 
   useEffect(() => {
     const hoverQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const compactQuery = window.matchMedia('(max-width: 767px)');
-    const updateMedia = () => {
-      setIsHoverDevice(hoverQuery.matches);
-      setIsCompact(compactQuery.matches);
-    };
+    const updateMedia = () => setIsHoverDevice(hoverQuery.matches);
 
     updateMedia();
     hoverQuery.addEventListener('change', updateMedia);
-    compactQuery.addEventListener('change', updateMedia);
-    return () => {
-      hoverQuery.removeEventListener('change', updateMedia);
-      compactQuery.removeEventListener('change', updateMedia);
-    };
+    return () => hoverQuery.removeEventListener('change', updateMedia);
   }, []);
 
   const setActive = (index: number) => {
@@ -92,7 +83,7 @@ const HoverExpand = ({
       className={cn(
         'mx-auto flex w-full max-w-5xl gap-2',
         orientation === 'horizontal'
-          ? 'h-[320px] flex-col sm:h-[360px] md:h-[420px] md:flex-row'
+          ? 'h-[240px] flex-row sm:h-[360px] md:h-[420px]'
           : 'h-[520px] flex-col',
         className,
       )}

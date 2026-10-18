@@ -43,13 +43,13 @@ function GalleryExpandSkeleton({ count }: { count: number }) {
     <div
       aria-label="Memuat pratinjau galeri"
       aria-busy="true"
-      className="mx-auto flex h-[320px] w-full max-w-5xl flex-col gap-2 sm:h-[360px] md:h-[420px] md:flex-row"
+      className="mx-auto flex h-[240px] w-full max-w-5xl flex-row gap-2 sm:h-[360px] md:h-[420px]"
       role="status"
     >
       {Array.from({ length: count }, (_, index) => (
         <div
           aria-hidden="true"
-          className={`min-h-0 min-w-0 flex-1 overflow-hidden rounded-xl border border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800 ${index === 0 ? 'flex-[4]' : ''}`}
+          className={`relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-xl border border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800 ${index === 0 ? 'flex-[4]' : ''}`}
           key={index}
         >
           <div className="gallery-skeleton h-full w-full" />

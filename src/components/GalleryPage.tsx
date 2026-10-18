@@ -83,7 +83,7 @@ export default function GalleryPage({ onBack }: { onBack: () => void }) {
         {loading && items.length === 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" role="status" aria-label="Memuat galeri kegiatan" aria-busy="true">
             {Array.from({ length: PER_HALAMAN }, (_, index) => (
-              <div key={index} aria-hidden="true" className="aspect-[4/3] overflow-hidden rounded-xl border border-slate-300 bg-slate-100 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <div key={index} aria-hidden="true" className="relative aspect-[4/3] overflow-hidden rounded-xl border border-slate-300 bg-slate-100 shadow-sm dark:border-slate-700 dark:bg-slate-800">
                 <div className="gallery-skeleton h-full w-full" />
               </div>
             ))}
@@ -115,7 +115,7 @@ export default function GalleryPage({ onBack }: { onBack: () => void }) {
         )}
 
         {items.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4" aria-busy={loading || loadingMore}>
+          <div className="animate-fade-in-scale grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 motion-reduce:animate-none" aria-busy={loading || loadingMore}>
             {items.map((item, i) => (
               <button
                 key={item.id}

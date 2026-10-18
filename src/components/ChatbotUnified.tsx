@@ -179,7 +179,7 @@ function TicketCard({ info }: { info: TicketInfo }) {
   const cfg = STATUS_STYLE[info.status] ?? STATUS_STYLE['Baru'];
   const Icon = cfg.Icon;
   return (
-    <div className="mt-3 overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <div className="mt-3 overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
       <div className="flex items-center justify-between border-b border-slate-300 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
         <span className="font-mono text-[11px] font-bold text-slate-500">{info.ticket}</span>
         <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${cfg.badge}`}
@@ -188,9 +188,9 @@ function TicketCard({ info }: { info: TicketInfo }) {
         </span>
       </div>
       <div className="space-y-1.5 p-3 text-xs text-slate-600 dark:text-slate-300">
-        <div className="flex gap-2"><span className="text-slate-400 w-14 shrink-0">Pelapor</span><span className="font-medium">{info.nama}</span></div>
-        <div className="flex gap-2"><span className="text-slate-400 w-14 shrink-0">Lokasi</span><span className="font-medium">{info.lokasi}</span></div>
-        <div className="flex gap-2"><span className="text-slate-400 w-14 shrink-0">Hal</span><span className="font-medium italic">"{info.deskripsi}"</span></div>
+        <div className="flex gap-2"><span className="w-14 shrink-0 text-slate-400 dark:text-slate-500">Pelapor</span><span className="font-medium">{info.nama}</span></div>
+        <div className="flex gap-2"><span className="w-14 shrink-0 text-slate-400 dark:text-slate-500">Lokasi</span><span className="font-medium">{info.lokasi}</span></div>
+        <div className="flex gap-2"><span className="w-14 shrink-0 text-slate-400 dark:text-slate-500">Hal</span><span className="font-medium italic">"{info.deskripsi}"</span></div>
         {info.catatan && (
           <div className="mt-1.5 rounded-lg border border-blue-100 bg-blue-50 p-2 text-[11px] text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200">
             <span className="font-bold">Respons petugas:</span> {info.catatan}
@@ -238,7 +238,7 @@ function WaCard({ name, waUrl }: WaCardProps) {
       </div>
       <div className="px-3 pb-3">
         <a href={waUrl} target="_blank" rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-2 text-xs font-bold text-white transition-colors hover:bg-[#1ebe5d]">
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-2 text-xs font-bold text-white hover:bg-[#1ebe5d] transition-colors">
           <Phone size={13} />Chat via WhatsApp
         </a>
       </div>
@@ -254,9 +254,9 @@ function TypingIndicator() {
       </div>
       <div className="rounded-2xl rounded-tl-none border border-slate-300 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div className="flex gap-1.5">
-          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300" style={{ animationDelay: '0ms' }} />
-          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300" style={{ animationDelay: '150ms' }} />
-          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300" style={{ animationDelay: '300ms' }} />
+          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300 dark:bg-slate-600" style={{ animationDelay: '0ms' }} />
+          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300 dark:bg-slate-600" style={{ animationDelay: '150ms' }} />
+          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-300 dark:bg-slate-600" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     </div>
@@ -293,6 +293,7 @@ export default function ChatbotUnified({
   const inputRef   = useRef<HTMLTextAreaElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const wasOpenRef = useRef(false);
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef  = useRef<HTMLInputElement>(null);
   const draftRef   = useRef<ComplaintDraft | null>(null);
@@ -384,6 +385,78 @@ export default function ChatbotUnified({
   }, [isOpen, clearPhotos, cancelAi]);
 
   useEffect(() => () => cancelAi(), [cancelAi]);
+
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => closeButtonRef.current?.focus({ preventScroll: true }));
+      wasOpenRef.current = true;
+    } else if (wasOpenRef.current) {
+      launcherRef.current?.focus({ preventScroll: true });
+      wasOpenRef.current = false;
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const body = document.body;
+    const scrollY = window.scrollY;
+    const previous = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
+
+    return () => {
+      Object.assign(body.style, previous);
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const panel = panelRef.current;
+    const viewport = window.visualViewport;
+    const mobile = window.matchMedia('(max-width: 639px)');
+    const syncPanel = () => {
+      if (!panel) return;
+      if (mobile.matches) {
+        panel.style.top = `${viewport?.offsetTop ?? 0}px`;
+        panel.style.bottom = 'auto';
+        panel.style.height = `${viewport?.height ?? window.innerHeight}px`;
+      } else {
+        panel.style.removeProperty('top');
+        panel.style.removeProperty('bottom');
+        panel.style.removeProperty('height');
+      }
+    };
+
+    syncPanel();
+    viewport?.addEventListener('resize', syncPanel);
+    viewport?.addEventListener('scroll', syncPanel);
+    window.addEventListener('resize', syncPanel);
+    mobile.addEventListener('change', syncPanel);
+    return () => {
+      viewport?.removeEventListener('resize', syncPanel);
+      viewport?.removeEventListener('scroll', syncPanel);
+      window.removeEventListener('resize', syncPanel);
+      mobile.removeEventListener('change', syncPanel);
+      panel?.style.removeProperty('top');
+      panel?.style.removeProperty('bottom');
+      panel?.style.removeProperty('height');
+    };
+  }, [isOpen]);
 
   // ── auto-scroll ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -823,6 +896,28 @@ export default function ChatbotUnified({
         aria-hidden={!isOpen}
         aria-labelledby="chatbot-title"
         tabIndex={-1}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            onToggle?.(false);
+            return;
+          }
+          if (event.key !== 'Tab' || !panelRef.current) return;
+
+          const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(
+            'button:not(:disabled), textarea:not(:disabled), input:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
+          )).filter((element) => element.getClientRects().length > 0);
+          if (!focusable.length) {
+            event.preventDefault();
+            panelRef.current.focus();
+          } else if (event.shiftKey && document.activeElement === focusable[0]) {
+            event.preventDefault();
+            focusable[focusable.length - 1].focus();
+          } else if (!event.shiftKey && document.activeElement === focusable[focusable.length - 1]) {
+            event.preventDefault();
+            focusable[0].focus();
+          }
+        }}
         className={`fixed inset-x-0 bottom-0 z-[1001] flex h-[100dvh] flex-col overflow-hidden bg-white shadow-2xl transition-[opacity,transform,visibility] duration-300 ease-out dark:bg-slate-950 sm:bottom-5 sm:left-auto sm:right-5 sm:h-[min(680px,92vh)] sm:w-[400px] sm:rounded-2xl
           ${isOpen ? 'visible translate-y-0 opacity-100' : 'invisible pointer-events-none translate-y-4 opacity-0'}`}
       >

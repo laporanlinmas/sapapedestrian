@@ -160,13 +160,9 @@ function PedestrianHeroBase({
 
   return (
     <div className={`pedestrian-hero ${className}`}>
-      {/* Panggung: glow lembut + bayangan tanah di bawah kaki.
-          Murni CSS dan dipanggang sekali. Sengaja tidak dianimasikan —
-          denyut opacity pada gradient selebar ~700 px memaksa browser
-          menggambar ulang seluruh gradien itu setiap frame. Kesan hidup sudah
-          datang dari lambaian petugasnya sendiri. */}
+        {/* Cahaya lembut memberi kedalaman tanpa menambah garis panggung di
+          bawah kanvas ilustrasi yang memang berakhir pada potongan badan. */}
       <div aria-hidden className="pedestrian-hero__glow" />
-      <div aria-hidden className="pedestrian-hero__shadow" />
 
       {/* Partikel cahaya: 6 titik HTML, satu lapisan komposit masing-masing. */}
       <div aria-hidden className="pedestrian-hero__motes">

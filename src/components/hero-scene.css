@@ -210,7 +210,7 @@
        pernah ikut terpotong — yang keluar hanya ruang kosong — tapi
        seluruh ilustrasi bergeser ke kanan, sehingga celah antara paragraf
        dan petugas bertambah tanpa teks harus diproporsikan lagi. */
-    inset: 0 -2.5% 4% auto;
+    inset: 0 -2.5% 0 auto;
     width: 56%;
     max-width: 1200px;
     margin-top: 0;
@@ -338,30 +338,27 @@ header .hero-content {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   TUTUP BAWAH
-   Bukan transisi antar-section — latar hero dan section berikutnya memang
-   sama saja. Yang dipotong di sini adalah kaki ilustrasi DAN aspal panorama
-   di paling bawah, jadi keduanya perlu memudar masuk ke latar halaman.
-
-   Tingginya penting: pada 34% dari tinggi hero, di HP (844 px) fade-nya
-   287 px — lebih tinggi dari ilustrasi itu sendiri (234 px), sehingga
-   petugas ikut memudar seluruhnya dan terlihat seperti ghost. 24% membuat
-   fade hanya menyasar bagian bawah yang memang terpotong. */
+  TUTUP BAWAH
+  Gradasi panjang melebur batas bawah kanvas ilustrasi ke warna halaman.
+  Petugas menapak tepat di dasar hero; tidak ada celah transparan yang
+  membuatnya tampak menggantung di atas section berikutnya.
+  ═══════════════════════════════════════════════════════════════════════════ */
 .hero-fade {
   position: absolute;
   bottom: 0;
   left: 0;
   z-index: 20;
   width: 100%;
-  height: 24%;
-  min-height: 110px;
-  max-height: 260px;
+  height: 30%;
+  min-height: 140px;
+  max-height: 300px;
   pointer-events: none;
   background: linear-gradient(
     to bottom,
     rgb(248 250 252 / 0) 0%,
-    rgb(248 250 252 / 0.16) 40%,
-    rgb(248 250 252 / 0.72) 78%,
+    rgb(248 250 252 / 0.06) 34%,
+    rgb(248 250 252 / 0.32) 62%,
+    rgb(248 250 252 / 0.82) 84%,
     rgb(248 250 252 / 1) 100%
   );
 }
@@ -370,47 +367,11 @@ header .hero-content {
   background: linear-gradient(
     to bottom,
     rgb(2 6 23 / 0) 0%,
-    rgb(2 6 23 / 0.2) 40%,
-    rgb(2 6 23 / 0.76) 78%,
+    rgb(2 6 23 / 0.08) 34%,
+    rgb(2 6 23 / 0.36) 62%,
+    rgb(2 6 23 / 0.84) 84%,
     rgb(2 6 23 / 1) 100%
   );
-}
-
-/* Naikkan ilustrasi sedikit — HANYA di layar yang ruang sisa-nya cukup.
-   Di layar pendek (tinggi < 760 px) ruang kosong antar elemen hanya ±20 px,
-   jadi mengangkat petugas justru membuat teks dan gambar bertabrakan; di sana
-   pembagian 50/50 sudah paling pas dan apanya dibiarkan.
-
-   Syarat `min-height` ini yang membuat adjustments ini aman di 360 × 640,
-   375 × 667, dan segudang layar pendek lain. */
-@media (max-width: 1023px) and (min-height: 760px) {
-  .hero-figure {
-    margin-bottom: 30px;
-  }
-  /* Potongan kaki petugas sekarang berhenti 30 px di atas dasar hero, jadi
-     gradasi penutupnya harus ikut memanjang agar potongan itu larut penuh
-     (α ≈ 0,96) alih-alih meninggalkan garis tipis. */
-  .hero-fade {
-    height: calc(24% + 30px);
-    background: linear-gradient(
-      to bottom,
-      rgb(248 250 252 / 0) 0%,
-      rgb(248 250 252 / 0.16) 30%,
-      rgb(248 250 252 / 0.78) 66%,
-      rgb(248 250 252 / 0.97) 88%,
-      rgb(248 250 252 / 1) 100%
-    );
-  }
-  .dark .hero-fade {
-    background: linear-gradient(
-      to bottom,
-      rgb(2 6 23 / 0) 0%,
-      rgb(2 6 23 / 0.2) 30%,
-      rgb(2 6 23 / 0.8) 66%,
-      rgb(2 6 23 / 0.97) 88%,
-      rgb(2 6 23 / 1) 100%
-    );
-  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

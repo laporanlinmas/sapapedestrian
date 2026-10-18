@@ -153,8 +153,12 @@ export default function WebViewScreen({
           />
         )}
 
-        {src && loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white px-6 text-center dark:bg-slate-950">
+        {src && (
+          <div
+            aria-hidden={!loading}
+            aria-busy={loading}
+            className={`absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white px-6 text-center transition-opacity duration-200 dark:bg-slate-950 motion-reduce:transition-none ${loading ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+          >
             <div className="relative h-10 w-10">
               <span className="absolute inset-0 rounded-full border-2 border-slate-300 dark:border-slate-800" />
               <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-blue-600 border-r-indigo-500" />

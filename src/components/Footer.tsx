@@ -103,18 +103,19 @@ export default function Footer() {
             <ul className="space-y-2 sm:space-y-4">
               <li className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 sm:gap-2.5 sm:text-xs">
                 <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
-                Jl. Trunojoyo No.147, Kauman, Kecamatan Ponorogo, Kabupaten Ponorogo, Jawa Timur 63419
+                <div>
+                  <p>Jl. Trunojoyo No.147, Kauman, Kecamatan Ponorogo, Kabupaten Ponorogo, Jawa Timur 63419</p>
+                  <p className="mt-1 flex items-center gap-2">
+                    <Clock className="h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
+                    Buka 24 Jam
+                  </p>
+                </div>
               </li>
-              <li className="pt-1 sm:pt-2">
+              <li>
                 {/* Mobile: "Buka 24 Jam" sendiri di barisnya, lalu di bawahnya
                     satu baris berisi ikon medsos + Satpol PP. Desktop: satu
                     baris seperti semula (jam di kiri, Satpol PP di kanan). */}
                 <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-x-3">
-                  <span className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 sm:gap-2.5 sm:text-xs">
-                    <Clock className="h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
-                    Buka 24 Jam
-                  </span>
-
                   <div className="flex items-center gap-2 sm:gap-x-2.5">
                     {/* Mobile only — menyatu dengan Satpol PP dalam satu baris. */}
                     <div className="md:hidden">{socialRow('start')}</div>

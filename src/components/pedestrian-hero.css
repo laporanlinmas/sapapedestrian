@@ -4,7 +4,7 @@
  *
  * Aturan main: apa pun yang BERGERAK di sini hanya memakai `transform` dan
  * `opacity`, supaya bisa dikomposit di GPU dan tidak memicu layout/repaint.
- * Elemen yang hanya `gradient` (glow, bayangan tanah) justru SENGAJA diam:
+ * Elemen yang hanya `gradient` (glow) justru SENGAJA diam:
  * grace seperti itu dipanggang sekali ke dalam layer dan tidak menggambar
  * ulang tiap frame.
  *
@@ -48,25 +48,6 @@
     rgb(96 165 250 / 0.22),
     transparent 72%
   );
-}
-
-/* Bayangan tanah: ellipse tipis di bawah kaki, memberi kesan berdiri di panggung. */
-.pedestrian-hero__shadow {
-  position: absolute;
-  left: 50%;
-  bottom: 1%;
-  z-index: -1;
-  width: 62%;
-  max-width: 420px;
-  height: 26px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(15 23 42 / 0.14), transparent 78%);
-}
-
-.dark .pedestrian-hero__shadow {
-  background: radial-gradient(closest-side, rgb(0 0 0 / 0.45), transparent 78%);
 }
 
 /* ── Partikel cahaya ──────────────────────────────────────────────────── */

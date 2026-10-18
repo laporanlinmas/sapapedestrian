@@ -11,8 +11,8 @@ interface FaqItem {
 
 const FAQS: FaqItem[] = [
   {
-    q: 'Apa itu Sapa Pedestrian (SIPEDAS)?',
-    a: 'SIPEDAS adalah Sistem Pelaporan Digital Satgas Linmas. Layanan publik Kabupaten Ponorogo ini dapat dipakai warga untuk memantau CCTV, membuka peta kerawanan, mengirim aduan, serta bertanya kepada asisten digital kapan saja.',
+    q: 'Apa itu Sapa Pedestrian?',
+    a: 'Kanal Sapa Pedestrian adalah Sistem Layanan publik Kabupaten Ponorogo yang dapat dipakai masyarakat untuk memantau CCTV, membuka peta kerawanan, mengirim aduan terkait kejadian di wilayah pedestrian.',
   },
   {
     q: 'Bagaimana cara mengirim aduan atau laporan?',
@@ -28,11 +28,11 @@ const FAQS: FaqItem[] = [
   },
   {
     q: 'Bagaimana cara melihat CCTV secara real-time?',
-    a: 'Buka kartu "SIPEDAS VIEW". Daftar kamera dan titik WiFi gratis di kawasan pedestrian akan tampil lengkap dengan peta lokasi. Halaman ini juga dapat dibuka langsung di /cctv.',
+    a: 'Buka kartu "SIPEDAS VIEW". Daftar kamera dan titik WiFi gratis di kawasan pedestrian akan tampil lengkap dengan peta lokasi.',
   },
   {
     q: 'Di mana saya bisa melihat titik rawan?',
-    a: 'Buka kartu "Peta Kerawanan" untuk melihat titik rawan yang terpetakan di kawasan pedestrian. Peta dapat diakses langsung di /mymaps.',
+    a: 'Buka kartu "Peta Kerawanan" untuk melihat titik rawan yang terpetakan di kawasan pedestrian.',
   },
   {
     q: 'Apakah tersedia WiFi gratis di kawasan pedestrian?',

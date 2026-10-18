@@ -15,7 +15,7 @@ export default function ProgramModal({ isOpen, onClose }: ProgramModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
       <button type="button" tabIndex={-1} aria-label="Tutup dialog profil program" className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onClick={onClose} />
 
-      <div ref={dialogRef} className="animate-fade-in-scale motion-reduce:animate-none relative flex max-h-[min(90dvh,760px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900" role="dialog" aria-modal="true" aria-labelledby="program-modal-title">
+      <div ref={dialogRef} className="animate-fade-in-scale relative flex max-h-[min(90dvh,760px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900" role="dialog" aria-modal="true" aria-labelledby="program-modal-title">
 
         <div className="relative h-36 shrink-0 overflow-hidden sm:h-44">
           <img src="/assets/pedestrian.webp" alt="Kawasan Pedestrian Ponorogo" className="w-full h-full object-cover object-[center_30%]" />

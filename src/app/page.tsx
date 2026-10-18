@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { MessageCircle, PenLine, Star } from 'lucide-react';
+import { ArrowLeft, Images, MessageCircle, PenLine } from 'lucide-react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import SectionLabel from '@/components/SectionLabel';
@@ -47,7 +47,7 @@ type Route = 'home' | 'rating' | 'cctv' | 'mymaps' | 'galeri';
 /** Placeholder selagi modul web view diunduh (chunk kecil, hampir instan). */
 function WebViewFallback({ title }: { title: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950">
+    <div className="route-view-enter fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950">
       <div className="flex h-11 shrink-0 items-center gap-2 bg-blue-700 px-2 text-white dark:bg-slate-800 sm:h-12 sm:px-3">
         <span className="h-7 w-16 rounded-lg bg-white/15" />
         <span className="h-4 w-px shrink-0 bg-white/25" />
@@ -61,9 +61,42 @@ function WebViewFallback({ title }: { title: string }) {
   );
 }
 
+function GalleryPageFallback({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="route-view-enter min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200">
+      <div className="page-backdrop" aria-hidden="true" />
+      <header className="flex h-11 shrink-0 items-center gap-2 bg-blue-700 px-2 text-white dark:bg-slate-800 sm:h-12 sm:px-3">
+        <button type="button" onClick={onBack} aria-label="Kembali ke beranda" className="flex shrink-0 items-center gap-1.5 rounded-lg bg-white/15 px-2 py-1.5 text-xs font-bold">
+          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="hidden sm:inline">Beranda</span>
+        </button>
+        <span className="h-4 w-px shrink-0 bg-white/25" aria-hidden="true" />
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/15"><Images className="h-4 w-4" aria-hidden="true" /></span>
+        <h1 className="text-[13px] font-extrabold">Galeri Kegiatan</h1>
+      </header>
+      <main className="mx-auto max-w-7xl px-2 py-8 sm:px-6" role="status" aria-label="Memuat galeri kegiatan" aria-busy="true">
+        <div className="mb-7 animate-pulse px-2 text-center motion-reduce:animate-none">
+          <div className="mx-auto h-8 w-56 rounded-md bg-slate-200 dark:bg-slate-800" />
+          <div className="mx-auto mt-4 h-4 w-full max-w-xl rounded bg-slate-100 dark:bg-slate-800/70" />
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4" aria-hidden="true">
+          {Array.from({ length: 12 }, (_, index) => (
+            <div key={index} className="relative aspect-[4/3] overflow-hidden rounded-xl border border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+              <div className="gallery-skeleton h-full w-full" />
+            </div>
+          ))}
+        </div>
+      </main>
+      <footer className="border-t border-slate-300 py-6 text-center dark:border-slate-700">
+        <div className="mx-auto h-3 w-64 max-w-[80%] animate-pulse rounded bg-slate-200 dark:bg-slate-800" aria-hidden="true" />
+      </footer>
+    </div>
+  );
+}
+
 function SurveyPageFallback({ onBack }: { onBack: () => void }) {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200">
+    <div className="route-view-enter min-h-screen overflow-x-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200">
       <div className="page-backdrop" aria-hidden="true" />
       <Header isSurveyPage onBack={onBack} />
       <main
@@ -108,40 +141,35 @@ function ChatbotFallback({ opened, onOpen }: { opened: boolean; onOpen: () => vo
   }
 
   return (
-    <div className="fixed inset-x-0 top-0 z-[1001] flex h-[100dvh] w-full flex-col overflow-hidden bg-white shadow-2xl dark:bg-slate-950 sm:inset-x-auto sm:bottom-5 sm:right-5 sm:top-auto sm:h-[min(680px,92vh)] sm:w-[400px] sm:rounded-2xl" role="status" aria-label="Memuat chatbot" aria-busy="true">
+    <div className="fixed inset-x-0 bottom-0 z-[1001] flex h-[100dvh] w-full flex-col overflow-hidden bg-white shadow-2xl dark:bg-slate-950 sm:bottom-5 sm:left-auto sm:right-5 sm:h-[min(680px,92vh)] sm:w-[400px] sm:rounded-2xl" role="status" aria-label="Memuat chatbot" aria-busy="true">
       <div className="flex h-[72px] shrink-0 items-center gap-3 bg-blue-700 px-5 pt-[env(safe-area-inset-top)] sm:pt-0">
         <span className="h-10 w-10 animate-pulse rounded-xl bg-white/20" />
         <span className="space-y-2"><span className="block h-3 w-32 animate-pulse rounded bg-white/30" /><span className="block h-2 w-40 animate-pulse rounded bg-white/20" /></span>
       </div>
-      <div className="min-h-0 flex-1 space-y-5 bg-slate-50 p-5 dark:bg-slate-900">
-        <span className="block h-14 w-3/4 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800" />
+      <div className="chatbot-message-surface min-h-0 flex-1 space-y-5 overflow-hidden p-5">
+        <span className="block h-14 w-3/4 animate-pulse rounded-2xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800" />
         <span className="ml-auto block h-12 w-2/3 animate-pulse rounded-2xl bg-blue-100 dark:bg-blue-950/60" />
       </div>
-      <div className="h-[72px] shrink-0 border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" />
+      <div className="h-16 shrink-0 border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" />
     </div>
   );
 }
 
 function AduanPanelFallback() {
   return (
-    <div className="fixed inset-0 z-[999] bg-slate-950/55 sm:bg-transparent" role="status" aria-label="Memuat formulir aduan" aria-busy="true">
-      <div className="fixed bottom-0 right-0 z-[1000] flex min-h-[480px] max-h-[92dvh] w-full max-w-[440px] flex-col overflow-hidden rounded-t-2xl border border-slate-300 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 sm:bottom-6 sm:right-6 sm:min-h-[520px] sm:max-h-[min(680px,92vh)] sm:rounded-2xl">
+    <div className="fixed inset-0 z-[999] bg-slate-900/60 sm:bg-transparent" role="status" aria-label="Memuat formulir aduan" aria-busy="true">
+      <div className="fixed bottom-0 right-0 z-[1000] flex min-h-[480px] max-h-[92dvh] w-full max-w-[440px] flex-col overflow-hidden rounded-t-2xl border border-slate-300 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 sm:bottom-6 sm:right-6 sm:min-h-[520px] sm:rounded-2xl">
         <div className="h-1 shrink-0 bg-gradient-to-r from-orange-400 to-red-500" />
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-300 px-3 py-2.5 dark:border-slate-800 sm:px-5 sm:py-3">
-          <div className="flex gap-1.5">
-            <span className="h-8 w-28 animate-pulse rounded-full bg-orange-200 dark:bg-orange-950/70" />
-            <span className="h-8 w-24 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
-          </div>
+        <div className="flex shrink-0 items-center gap-2 border-b border-slate-300 px-3 py-2.5 dark:border-slate-800 sm:px-5 sm:py-3">
+          <span className="h-8 flex-1 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+          <span className="h-8 flex-1 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
           <span className="h-8 w-8 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
         </div>
-        <div className="min-h-0 flex-1 space-y-3 overflow-hidden p-4 sm:p-5">
-          <span className="block h-10 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
-          <span className="block h-10 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
-          <span className="block h-10 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
-          <span className="block h-24 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
-        </div>
-        <div className="shrink-0 border-t border-slate-300 p-4 dark:border-slate-800 sm:px-5">
-          <span className="block h-10 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+        <div className="min-h-0 flex-1 space-y-3 overflow-hidden p-4">
+          <span className="block h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+          <span className="block h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+          <span className="block h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+          <span className="block h-28 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
         </div>
       </div>
     </div>
@@ -235,15 +263,19 @@ export default function HomePage() {
   if (page === 'rating') {
     return (
       <Suspense fallback={<SurveyPageFallback onBack={() => navigateTo('home')} />}>
-        <SurveyPage onBack={() => navigateTo('home')} />
+        <div key={page} className="route-view-enter">
+          <SurveyPage onBack={() => navigateTo('home')} />
+        </div>
       </Suspense>
     );
   }
 
   if (page === 'galeri') {
     return (
-      <Suspense fallback={null}>
-        <GalleryPage onBack={() => navigateTo('home')} />
+      <Suspense fallback={<GalleryPageFallback onBack={() => navigateTo('home')} />}>
+        <div key={page} className="route-view-enter">
+          <GalleryPage onBack={() => navigateTo('home')} />
+        </div>
       </Suspense>
     );
   }
@@ -252,19 +284,21 @@ export default function HomePage() {
   if (page === 'cctv' || page === 'mymaps') {
     const isCctv = page === 'cctv';
     return (
-      <Suspense fallback={<WebViewFallback title={isCctv ? 'SIPEDAS VIEW' : 'Peta Kerawanan'} />}>
-        <WebViewScreen
-          src={isCctv ? CCTV_URL : MAP_URL}
-          title={isCctv ? 'SIPEDAS VIEW' : 'Peta Kerawanan'}
-          syncTheme={isCctv}
-          onBack={() => navigateTo('home')}
-        />
-      </Suspense>
+        <Suspense fallback={<WebViewFallback title={isCctv ? 'SIPEDAS VIEW' : 'Peta Kerawanan'} />}>
+          <div key={page} className="route-view-enter">
+            <WebViewScreen
+              src={isCctv ? CCTV_URL : MAP_URL}
+              title={isCctv ? 'SIPEDAS VIEW' : 'Peta Kerawanan'}
+              syncTheme={isCctv}
+              onBack={() => navigateTo('home')}
+            />
+          </div>
+        </Suspense>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300 overflow-x-hidden">
+    <div key={page} className="route-view-enter min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300 overflow-x-hidden">
 
       {/* Latar lembut — radial-gradient statis (tanpa filter blur per-frame) */}
       <div className="page-backdrop" aria-hidden />
@@ -294,18 +328,12 @@ export default function HomePage() {
           <div className="max-w-3xl mx-auto text-center p-5 sm:p-10 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-3xl">
             {/* Mobile: horizontal layout */}
             <div className="flex items-center gap-4 sm:block">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-amber-100 dark:bg-amber-950/40 text-amber-500 dark:text-amber-400 rounded-2xl flex items-center justify-center sm:mx-auto sm:mb-5 border border-amber-200 dark:border-amber-900">
-                <Star className="w-6 h-6 sm:w-7 sm:h-7" />
-              </div>
-              <div className="flex-1 sm:block text-left sm:text-center">
-                <h3 className="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white sm:mb-2">
+              <div className="min-w-0 flex-1 text-left sm:block sm:text-center">
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white sm:text-2xl sm:mb-2">
                   Berikan Rating Layanan
                 </h3>
-                <p className="hidden sm:block text-slate-600 dark:text-slate-400 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed sm:mb-6">
-                  Bantu kami meningkatkan kualitas layanan Sapa Pedestrian dengan penilaian bintang Anda.
-                </p>
-                <p className="sm:hidden text-xs text-slate-600 dark:text-slate-400 leading-snug mt-0.5">
-                  Berikan penilaian bintang layanan Anda
+                <p className="mt-1 text-xs leading-snug text-slate-600 dark:text-slate-400 sm:mx-auto sm:mb-6 sm:mt-0 sm:max-w-lg sm:text-sm sm:leading-relaxed">
+                  Masukan Anda membantu kami meningkatkan layanan Sapa Pedestrian.
                 </p>
               </div>
               <button
