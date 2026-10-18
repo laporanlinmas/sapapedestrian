@@ -69,11 +69,11 @@ export default function WebViewScreen({
 
   // ── Jaring pengaman: konten lambat / diblokir ───────────────────────────
   useEffect(() => {
-    if (!loading) return;
+    if (!src || !loading) return;
     setSlow(false);
     const t = setTimeout(() => setSlow(true), LOAD_TIMEOUT_MS);
     return () => clearTimeout(t);
-  }, [loading, loadKey]);
+  }, [src, loading, loadKey]);
 
   const postTheme = useCallback(() => {
     if (!syncTheme) return;
@@ -126,22 +126,34 @@ export default function WebViewScreen({
 
       {/* ── Konten + spinner tengah ── */}
       <div className="relative min-h-0 flex-1 bg-slate-100 dark:bg-slate-900">
-        <iframe
-          key={loadKey}
-          ref={iframeRef}
-          src={frameSrc}
-          title={title}
-          allow="fullscreen; autoplay; encrypted-media"
-          allowFullScreen
-          loading="eager"
-          onLoad={() => {
-            setLoading(false);
-            postTheme();
-          }}
-          className="absolute inset-0 h-full w-full border-0"
-        />
+        {!src ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
+            <TriangleAlert className="h-9 w-9 text-amber-500" aria-hidden="true" />
+            <div>
+              <p className="font-bold text-slate-800 dark:text-slate-100">{title} belum dikonfigurasi.</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                Tautan layanan ini belum tersedia. Silakan kembali ke beranda.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <iframe
+            key={loadKey}
+            ref={iframeRef}
+            src={frameSrc}
+            title={title}
+            allow="fullscreen; autoplay; encrypted-media"
+            allowFullScreen
+            loading="eager"
+            onLoad={() => {
+              setLoading(false);
+              postTheme();
+            }}
+            className="absolute inset-0 h-full w-full border-0"
+          />
+        )}
 
-        {loading && (
+        {src && loading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white px-6 text-center dark:bg-slate-950">
             <div className="relative h-10 w-10">
               <span className="absolute inset-0 rounded-full border-2 border-slate-300 dark:border-slate-800" />

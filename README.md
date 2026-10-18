@@ -123,7 +123,18 @@ npm run audit:unused # unused files/dependencies and unresolved imports
 npm run check       # lint + tests + unused-code audit
 npm run build       # typecheck + bundle produksi
 npm run preview     # jalanin hasil build + API
+npm run check:smoke # cek route, aset, dan validasi API pada server yang hidup
+npm run test:ui     # tes browser alur fitur + layout desktop/tablet/ponsel
+npm run check:all   # lint, unit test, dead-code, build, dan tes browser
 ```
+
+Tes browser memerlukan Chromium satu kali: `npx playwright install chromium`.
+Server Vite dimulai otomatis oleh `test:ui`; endpoint tulis di-mock agar tes
+tidak mengirim data sungguhan. Screenshot/video/trace kegagalan tersimpan di
+`test-results/`, laporan HTML di `playwright-report/`. Smoke test dapat diarahkan
+ke deployment yang sedang aktif:
+`npm run check:smoke -- --base-url https://domain-anda`.
+Panduan detail ada di [`scripts/README.md`](./scripts/README.md).
 
 Skrip maintainer menggunakan TypeScript `.mts` dan Node.js 22.6+:
 

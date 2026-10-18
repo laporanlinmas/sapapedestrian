@@ -26,7 +26,7 @@
       ]
     },
     {
-      "source": "/assets/.*\\.(webp|png|jpe?g|avif|svg|ico)$",
+      "source": "/assets/:file(.*\\.(?:webp|png|jpe?g|avif|svg|ico))",
       "headers": [
         {
           "key": "Cache-Control",
