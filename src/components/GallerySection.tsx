@@ -161,6 +161,7 @@ export default function GallerySection({ onOpenPage }: { onOpenPage: () => void 
                 <HoverExpand
                   items={cards}
                   onImageError={onPhotoError}
+                  showLabelsWhenCollapsed={false}
                 />
               ) : (
                 <GalleryExpandSkeleton count={PREVIEW} />

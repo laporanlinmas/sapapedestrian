@@ -69,11 +69,7 @@ export default function FaqSection() {
             return (
               <div
                 key={item.q}
-                className={`rounded-xl border bg-white shadow-sm dark:bg-slate-900 transition-colors duration-200 ${
-                  isOpen
-                    ? 'border-blue-300 dark:border-blue-700'
-                    : 'border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600'
-                }`}
+                className="rounded-xl border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
               >
                 <h3>
                   <button
@@ -85,14 +81,14 @@ export default function FaqSection() {
                     className="group flex min-h-14 w-full items-center gap-3 px-4 py-3.5 text-left focus-visible:outline-none
                                focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 sm:px-5"
                   >
-                    <span className={`w-7 shrink-0 text-[10px] font-bold tabular-nums ${isOpen ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`} aria-hidden="true">
+                    <span className="w-7 shrink-0 text-[10px] font-bold tabular-nums text-slate-400 dark:text-slate-500" aria-hidden="true">
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     <span className="flex-1 text-sm sm:text-[15px] font-bold text-slate-900 dark:text-white">
                       {item.q}
                     </span>
                     <ChevronDown
-                      className={`w-4 h-4 shrink-0 text-slate-500 transition-transform duration-200 group-hover:text-blue-600 dark:text-slate-400 dark:group-hover:text-blue-400 ${
+                      className={`w-4 h-4 shrink-0 text-slate-500 transition-transform duration-200 dark:text-slate-400 ${
                         isOpen ? 'rotate-180' : ''
                       }`}
                       aria-hidden="true"

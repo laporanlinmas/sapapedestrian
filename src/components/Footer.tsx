@@ -101,14 +101,14 @@ export default function Footer() {
               Instansi
             </h4>
             <ul className="space-y-2 sm:space-y-4">
-              <li className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 sm:gap-2.5 sm:text-xs">
-                <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
-                <div>
-                  <p>Jl. Trunojoyo No.147, Kauman, Kecamatan Ponorogo, Kabupaten Ponorogo, Jawa Timur 63419</p>
-                  <p className="mt-1 flex items-center gap-2">
-                    <Clock className="h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
-                    Buka 24 Jam
-                  </p>
+              <li className="space-y-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 sm:space-y-1.5 sm:text-xs">
+                <div className="flex items-start gap-2 sm:gap-2.5">
+                  <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
+                  <p className="min-w-0">Jl. Trunojoyo No.147, Kauman, Kecamatan Ponorogo, Kabupaten Ponorogo, Jawa Timur 63419</p>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-2.5">
+                  <Clock className="h-3 w-3 shrink-0 text-blue-500 sm:h-3.5 sm:w-3.5" />
+                  <p>Buka 24 Jam</p>
                 </div>
               </li>
               <li>

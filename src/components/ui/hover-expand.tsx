@@ -116,7 +116,7 @@ const HoverExpand = ({
             transition={
               shouldReduceMotion
                 ? { duration: 0 }
-                : { bounce: 0.1, duration: 0.25, type: 'spring' }
+                : { duration: 0.38, ease: [0.22, 1, 0.36, 1], type: 'tween' }
             }
             type="button"
           >
@@ -141,17 +141,16 @@ const HoverExpand = ({
                   ? { opacity: shouldShowLabel ? 1 : 0 }
                   : {
                       opacity: shouldShowLabel ? 1 : 0,
-                      rotate: isHorizontal && !isActive ? -90 : 0,
                     }
               }
               className="pointer-events-none absolute inset-0 flex items-end p-3 sm:p-4"
               transition={
                 shouldReduceMotion
                   ? { duration: 0 }
-                  : { bounce: 0.1, duration: 0.25, type: 'spring' }
+                  : { duration: 0.28, ease: [0.22, 1, 0.36, 1], type: 'tween' }
               }
             >
-              <div className={cn(isHorizontal && !isActive && 'origin-left whitespace-nowrap')}>
+              <div className="max-w-full">
                 <p className="text-sm font-semibold text-white">{item.title}</p>
                 {isActive && item.description ? (
                   <p className="mt-1 text-xs text-white/80">{item.description}</p>
