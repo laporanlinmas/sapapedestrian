@@ -167,14 +167,14 @@ const CFG = {
     'Saya belum dapat menemukan jawaban yang tepat untuk pertanyaan tersebut. Apakah Anda ingin mengetahui informasi lain seputar kawasan pedestrian, PKL, patroli, atau layanan Satgas Linmas Ponorogo?',
   ],
   GREETING: [
-    'Halo! Selamat datang di SIPEDAS Assistant — asisten resmi Satgas Linmas Pedestrian Ponorogo. Saya siap membantu Anda terkait informasi kawasan pedestrian, aturan PKL, jadwal patroli, pemantauan CCTV, prosedur pengaduan, dan informasi petugas. Apa yang ingin Anda ketahui?',
-    'Hai! Saya SIPEDAS, asisten virtual Satgas Linmas Pedestrian Ponorogo. Tanyakan apa saja seputar kawasan pedestrian — mulai dari aturan berjualan, cara lapor pengaduan, jadwal operasional, hingga kontak petugas. Dengan senang hati saya bantu!',
-    'Selamat datang di SIPEDAS! Saya hadir untuk membantu Anda mendapatkan informasi lengkap seputar Satgas Linmas Pedestrian Ponorogo dan kawasan pedestrian kota. Ada yang bisa saya bantu hari ini?',
+    'Halo! Selamat datang di Chatbot Cerdas — asisten Satgas Linmas Pedestrian Ponorogo. Saya siap membantu Anda terkait informasi kawasan pedestrian, aturan PKL, jadwal patroli, pemantauan CCTV, prosedur pengaduan, dan informasi petugas. Apa yang ingin Anda ketahui?',
+    'Hai! Saya Chatbot Cerdas, asisten virtual Satgas Linmas Pedestrian Ponorogo. Tanyakan apa saja seputar kawasan pedestrian — mulai dari aturan berjualan, cara lapor pengaduan, jadwal operasional, hingga kontak petugas. Dengan senang hati saya bantu!',
+    'Selamat datang! Saya Chatbot Cerdas, siap membantu Anda mendapatkan informasi seputar Satgas Linmas Pedestrian Ponorogo dan kawasan pedestrian kota. Ada yang bisa saya bantu hari ini?',
   ],
   THANKS: [
     'Sama-sama! Jangan ragu untuk bertanya lagi jika ada informasi lain yang Anda butuhkan seputar kawasan pedestrian Ponorogo.',
     'Dengan senang hati! Apakah ada hal lain yang bisa saya bantu terkait layanan Satgas Linmas Pedestrian?',
-    'Terima kasih sudah menggunakan SIPEDAS! Jika ada pertanyaan lain seputar pedestrian, PKL, atau layanan Satgas Linmas, saya siap membantu.',
+    'Terima kasih sudah menggunakan Chatbot Cerdas! Jika ada pertanyaan lain seputar pedestrian, PKL, atau layanan Satgas Linmas, saya siap membantu.',
   ],
 } as const;
 

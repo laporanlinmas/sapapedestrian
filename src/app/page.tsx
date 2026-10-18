@@ -131,7 +131,7 @@ function ChatbotFallback({ opened, onOpen }: { opened: boolean; onOpen: () => vo
       <button
         type="button"
         onClick={onOpen}
-        aria-label="Buka Chatbot SIPEDAS"
+        aria-label="Buka Chatbot Cerdas"
         className="fixed bottom-5 right-5 z-[1000] flex h-12 w-12 items-center justify-center rounded-full text-white shadow-xl"
         style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}
       >

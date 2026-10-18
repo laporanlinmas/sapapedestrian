@@ -1,6 +1,6 @@
 'use client';
 
-import { Send, Bot, ChevronRight } from 'lucide-react';
+import { Send, Bot } from 'lucide-react';
 import SectionLabel from '@/components/SectionLabel';
 
 interface ComplaintSectionProps {
@@ -24,13 +24,11 @@ export default function ComplaintSection({ onOpenChatbot, onOpenAduan }: Complai
       iconCls: 'bg-orange-500',
       descDesktop: 'Laporkan kejadian atau gangguan langsung. Sertakan foto bukti dan lacak status tiket Anda.',
       descMobile: 'Laporkan kejadian & lacak tiket',
-      cta: 'Buat Laporan',
-      ctaCls: 'text-orange-700 dark:text-orange-400',
       surface: 'bg-white dark:bg-slate-900',
     },
     {
       onOpen: onOpenChatbot,
-      title: 'Chatbot SIPEDAS',
+      title: 'Chatbot Cerdas',
       Icon: Bot,
       /* Biru, bukan hijau. Hijau dipakai untuk "Form Aduan" dan sudah jadi
         warna aksi di beberapa tempat, sehingga kartu chatbot hijau terlihat
@@ -39,8 +37,6 @@ export default function ComplaintSection({ onOpenChatbot, onOpenAduan }: Complai
       iconCls: 'bg-blue-600',
       descDesktop: 'Tanya jawab, lapor kejadian, dan cek status tiket melalui asisten AI yang siap 24 jam.',
       descMobile: 'Asisten AI 24 jam · tanya & lapor',
-      cta: 'Buka Chatbot',
-      ctaCls: 'text-blue-700 dark:text-blue-400',
       surface: 'bg-white dark:bg-slate-900',
     },
   ];
@@ -60,7 +56,7 @@ export default function ComplaintSection({ onOpenChatbot, onOpenAduan }: Complai
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {cards.map(({ onOpen, title, Icon, iconCls, descDesktop, descMobile, cta, ctaCls, surface }) => (
+          {cards.map(({ onOpen, title, Icon, iconCls, descDesktop, descMobile, surface }) => (
             <button
               key={title}
               type="button"
@@ -93,13 +89,6 @@ export default function ComplaintSection({ onOpenChatbot, onOpenAduan }: Complai
                 </div>
               </div>
 
-              <span
-                className={`mt-4 inline-flex items-center gap-1 text-sm font-bold ${ctaCls}
-                            transition-transform duration-200 group-hover:translate-x-0.5`}
-              >
-                {cta}
-                <ChevronRight className="w-4 h-4" aria-hidden="true" />
-              </span>
             </button>
           ))}
         </div>

@@ -78,8 +78,8 @@ sebelumnya atau berpindah topik.
    penting, daftar singkat bila memang berupa langkah.
 2. Panjang 2–5 kalimat. Ini tampilan mobile — jangan menulis esai.
 3. Jangan mengarang fakta SIPEDAS. Bila jawaban tentang instansi tidak ada di
-  bahan baca, katakan terus terang bahwa informasinya belum tersedia dan
-  arahkan ke Form Aduan atau petugas.
+  bahan baca atau daftar kontak resmi di bawah, katakan terus terang bahwa
+  informasinya belum tersedia dan arahkan ke Form Aduan atau petugas.
 4. Jangan mengarang angka, tanggal, nama, alamat, atau jadwal. Semua itu
    wajib ada di bahan baca.
 5. Nomor tiket hanya berbentuk ADU-YYMMDD-NNNN. Kalau pengguna memberi nomor
@@ -111,15 +111,27 @@ tanpa tindakan antarmuka tersebut.
 Satpol PP Kabupaten Ponorogo, Jl. Trunojoyo No. 147, Kauman, Kecamatan
 Ponorogo, Kabupaten Ponorogo, Jawa Timur 63419. Layanan buka 24 jam.`;
 
+const EMERGENCY_CONTACT_CONTEXT = `
+
+# Kontak layanan resmi
+- Satpol PP: 08113134535
+- Satlinmas: 082337017307
+- Pemadam Kebakaran (Damkar): 082160063113
+- Laporan temuan rokok ilegal: 082338908248
+Gunakan nomor persis seperti tercantum. Jika pertanyaan meminta kontak darurat
+umum, berikan keempat nomor beserta nama layanannya. Jangan menebak nomor lain.`;
+
+const SYSTEM_PROMPT_WITH_CONTACTS = SYSTEM_PROMPT + EMERGENCY_CONTACT_CONTEXT;
+
 /** Varian saat bahan baca gagal diambil — model diberi tahu, bukan dibohongi. */
 const SYSTEM_PROMPT_TANPA_BAHAN_BACA =
-  SYSTEM_PROMPT +
+  SYSTEM_PROMPT_WITH_CONTACTS +
   `
 
 # CATATAN PENTING
 Bahan baca internal sedang tidak dapat diakses. Jawab hanya dari pengetahuan
-umum. Bila pertanyaannya menyangkut data instansi — jadwal, nama, alamat,
-nomor telepon, atau status tiket — sampaikan bahwa data tersebut belum dapat
+umum dan daftar kontak resmi di atas. Untuk jadwal, nama, alamat, atau status
+tiket yang tidak tersedia, sampaikan bahwa data tersebut belum dapat
 diverifikasi, dan arahkan pengguna ke Form Aduan atau Satpol PP Ponorogo.`;
 
 /* ── Pengambilan bahan baca ─────────────────────────────────────────────── */
@@ -336,7 +348,7 @@ async function run(model: string, deps: StreamDeps, messages: ChatTurn[]): Promi
 
 function systemWithContext(context: string): string {
   return context
-    ? `${SYSTEM_PROMPT}\n\n# BAHAN BACA (dari dokumen resmi SIPEDAS)\nBila pertanyaannya menyangkut SIPEDAS atau Satpol PP, jawab HANYA dari bahan baca ini. Jangan mengarang di luarnya.\n\n${context}`
+    ? `${SYSTEM_PROMPT_WITH_CONTACTS}\n\n# BAHAN BACA (dari dokumen resmi SIPEDAS)\nBila pertanyaannya menyangkut SIPEDAS atau Satpol PP, jawab HANYA dari bahan baca ini. Jangan mengarang di luarnya.\n\n${context}`
     : SYSTEM_PROMPT_TANPA_BAHAN_BACA;
 }
 

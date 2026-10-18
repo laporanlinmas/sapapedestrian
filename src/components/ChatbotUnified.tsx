@@ -31,6 +31,7 @@ type ChatInfoModal = 'programModal' | 'jadwalModal';
 
 type ChatAction =
   | { label: string; payload: string; type: 'text' | 'link'; icon?: React.ReactNode }
+  | { label: string; payload: string; type: 'phone'; icon?: React.ReactNode }
   | { label: string; payload: ChatResource; type: 'route'; icon?: React.ReactNode }
   | { label: string; payload: ChatInfoModal; type: 'modal'; icon?: React.ReactNode }
   | { label: string; payload: 'aduan'; type: 'panel'; icon?: React.ReactNode };
@@ -77,7 +78,7 @@ interface ComplaintDraft {
 /**
  * Biru, bukan hitam-navy. Sebelumnya `#0f172a → #1e3a8a` membaca hampir hitam
  * di layar, jadi tombol mengambang chatbot terlihat seperti grey/neutral —
- * tidak punya tint biru seperti kartu "Chatbot SIPEDAS" di section
+ * tidak punya tint biru seperti kartu chatbot di section
  * Layanan Pengaduan. Sekarang keduanya satu warna.
  */
 const NAV_GRADIENT = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
@@ -108,6 +109,13 @@ const LOKASI_LIST = [
   'Jl. Gajah Mada',
   'Alun-alun Ponorogo',
   'Lokasi Lainnya',
+];
+
+const EMERGENCY_CONTACTS = [
+  { name: 'Satpol PP', number: '08113134535', pattern: /\bsatpol\s*pp\b|\bsatpol\b/i },
+  { name: 'Satlinmas', number: '082337017307', pattern: /\bsatlinmas\b|\blinmas\b/i },
+  { name: 'Damkar', number: '082160063113', pattern: /\bdamkar\b|\bpemadam\b|\bkebakaran\b/i },
+  { name: 'Temuan rokok ilegal', number: '082338908248', pattern: /rokok\s+ilegal|rokok\s+tanpa\s+cukai|\bcukai\b/i },
 ];
 
 const STATUS_STYLE: Record<string, { color: string; badge: string; Icon: React.ElementType }> = {
@@ -297,6 +305,7 @@ export default function ChatbotUnified({
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef  = useRef<HTMLInputElement>(null);
   const draftRef   = useRef<ComplaintDraft | null>(null);
+  const photoPreviewsRef = useRef(new Set<string>());
   const prevOpened = useRef(false);
 
   const isOpen = opened === true;
@@ -307,8 +316,12 @@ export default function ChatbotUnified({
     setMessages(prev => [...prev, { role, text, ts: timeNow(), ...extra }]);
   }, []);
 
-  const clearPhotos = useCallback(() => {
-    setPendingPhotos(prev => { prev.forEach(p => URL.revokeObjectURL(p.preview)); return []; });
+  const clearPhotos = useCallback(() => setPendingPhotos([]), []);
+
+  const releasePhotoPreviews = useCallback(() => {
+    photoPreviewsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    photoPreviewsRef.current.clear();
+    setPendingPhotos([]);
   }, []);
 
   // ═══════════════════════════════════════════════════════════════════
@@ -367,7 +380,7 @@ export default function ChatbotUnified({
     if (isOpen && !prevOpened.current) {
       setMessages([{
         role: 'bot',
-        text: 'Selamat datang di **SIPEDAS Assistant** — asisten resmi Satgas Linmas Pedestrian Ponorogo.\n\nAda yang bisa saya bantu hari ini?',
+        text: 'Selamat datang di **Chatbot Cerdas** — asisten Satgas Linmas Pedestrian Ponorogo.\n\nAda yang bisa saya bantu hari ini?',
         actions: QUICK_ACTIONS,
         ts: timeNow(),
       }]);
@@ -378,13 +391,17 @@ export default function ChatbotUnified({
       cancelAi();
       draftRef.current = null;
       setActiveStep(null);
-      clearPhotos();
+      releasePhotoPreviews();
       resetMemory();
     }
     prevOpened.current = isOpen;
-  }, [isOpen, clearPhotos, cancelAi]);
+  }, [isOpen, releasePhotoPreviews, cancelAi]);
 
-  useEffect(() => () => cancelAi(), [cancelAi]);
+  useEffect(() => () => {
+    cancelAi();
+    photoPreviewsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    photoPreviewsRef.current.clear();
+  }, [cancelAi]);
 
   useEffect(() => {
     if (isOpen) {
@@ -466,55 +483,89 @@ export default function ChatbotUnified({
   // ── photo handler ─────────────────────────────────────────────────────────
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
-    const added = Array.from(files).slice(0, 3 - pendingPhotos.length).map(f => ({
-      file: f,
-      preview: URL.createObjectURL(f),
-    }));
+    const alreadyAttached = draftRef.current?.photos.length ?? 0;
+    const available = Math.max(0, 3 - alreadyAttached - pendingPhotos.length);
+    const added = Array.from(files).slice(0, available).map((file) => {
+      const preview = URL.createObjectURL(file);
+      photoPreviewsRef.current.add(preview);
+      return { file, preview };
+    });
     setPendingPhotos(prev => [...prev, ...added].slice(0, 3));
   };
 
   const removePhoto = (idx: number) => {
-    URL.revokeObjectURL(pendingPhotos[idx].preview);
+    const preview = pendingPhotos[idx].preview;
+    URL.revokeObjectURL(preview);
+    photoPreviewsRef.current.delete(preview);
     setPendingPhotos(prev => prev.filter((_, i) => i !== idx));
   };
 
+  const askForNextComplaintField = (draft: ComplaintDraft) => {
+    if (!draft.nama) {
+      draft.step = 'nama'; setActiveStep('nama');
+      addMsg('bot', 'Sebutkan **nama lengkap** pelapor:');
+    } else if (!draft.kategori) {
+      draft.step = 'kategori'; setActiveStep('kategori');
+      addMsg('bot', 'Pilih kategori gangguan yang paling sesuai:');
+    } else if (!draft.lokasi) {
+      draft.step = 'lokasi'; setActiveStep('lokasi');
+      addMsg('bot', 'Di mana lokasi spesifik kejadiannya?');
+    } else if (!draft.deskripsi) {
+      draft.step = 'deskripsi'; setActiveStep('deskripsi');
+      addMsg('bot', 'Jelaskan secara singkat apa yang terjadi (minimal 10 karakter):');
+    } else {
+      draft.step = 'foto'; setActiveStep('foto');
+      addMsg('bot', draft.photos.length
+        ? 'Informasi dan foto sudah siap. Periksa kembali, lalu ketik **kirim** untuk mengirim laporan.'
+        : 'Informasi sudah siap. Tambahkan foto bila ada, lalu ketik **kirim**. Ketik **lanjut** untuk mengirim tanpa foto.');
+    }
+  };
 
   // ── complaint flow ────────────────────────────────────────────────────────
   const processComplaint = async (text: string, photos: ChatPhoto[]): Promise<boolean> => {
     const draft = draftRef.current;
     if (!draft) return false;
+    if (photos.length) {
+      const existingFiles = new Set(draft.photos.map((photo) => photo.file));
+      draft.photos = [...draft.photos, ...photos.filter((photo) => !existingFiles.has(photo.file))].slice(0, 3);
+    }
 
     if (draft.step === 'nama') {
       if (text.length < 3) { addMsg('bot', 'Mohon masukkan nama lengkap Anda.'); return true; }
-      draft.nama = text; draft.step = 'kategori'; setActiveStep('kategori');
-      addMsg('bot', `Salam, **${text}**. Pilih kategori gangguan yang ingin dilaporkan:`);
+      draft.nama = text;
+      askForNextComplaintField(draft);
       return true;
     }
 
     if (draft.step === 'kategori') {
-      draft.kategori = text; draft.step = 'lokasi'; setActiveStep('lokasi');
-      addMsg('bot', `Kategori: **${text}**.\n\nDi mana lokasi spesifik kejadiannya?`);
+      draft.kategori = text;
+      askForNextComplaintField(draft);
       return true;
     }
 
     if (draft.step === 'lokasi') {
-      draft.lokasi = text; draft.step = 'deskripsi'; setActiveStep('deskripsi');
-      addMsg('bot', 'Deskripsikan kejadian tersebut secara singkat (minimal 10 karakter):');
+      draft.lokasi = text;
+      askForNextComplaintField(draft);
       return true;
     }
 
     if (draft.step === 'deskripsi') {
       if (text.length < 10) { addMsg('bot', 'Deskripsi terlalu singkat. Mohon berikan informasi lebih detail.'); return true; }
-      draft.deskripsi = text; draft.step = 'foto'; setActiveStep('foto');
-      addMsg('bot', 'Informasi tercatat. Apakah ada **foto bukti**?\n\nGunakan tombol kamera di bawah, atau ketik *lanjut* untuk kirim tanpa foto.');
+      draft.deskripsi = text;
+      askForNextComplaintField(draft);
       return true;
     }
 
     if (draft.step === 'foto') {
-      const skip = /lanjut|skip|lewati|tidak|ga|gak/i.test(text);
-      const finalPhotos = [...draft.photos, ...photos];
-      if (!skip && finalPhotos.length === 0) {
-        addMsg('bot', 'Lampirkan foto atau ketik *lanjut* untuk melewati.');
+      const sendConfirmed = /^(kirim|kirim laporan|lanjut|ya|iya|setuju)$/i.test(text);
+      const skipPhoto = /^(tanpa foto|lewati foto|skip foto|tidak ada foto)$/i.test(text);
+      const finalPhotos = draft.photos;
+      if (finalPhotos.length && !sendConfirmed) {
+        addMsg('bot', 'Foto sudah terlampir. Ketik **kirim** jika data sudah benar dan Anda ingin mengirim laporan.');
+        return true;
+      }
+      if (!finalPhotos.length && !sendConfirmed && !skipPhoto) {
+        addMsg('bot', 'Tambahkan foto bila ada, lalu ketik **kirim**. Ketik **lanjut** untuk mengirim tanpa foto.');
         return true;
       }
       setIsBusy(true);
@@ -589,20 +640,54 @@ export default function ChatbotUnified({
         return;
       }
 
+      const matchedContacts = EMERGENCY_CONTACTS.filter((contact) => contact.pattern.test(text));
+      const asksAllEmergency = /nomor\s+darurat|kontak\s+darurat|nomor\s+layanan\s+darurat/i.test(text);
+      const asksContact = /\b(?:nomor|kontak|telepon|telp|hubungi|darurat)\b/i.test(text);
+      if (asksAllEmergency || (asksContact && matchedContacts.length > 0)) {
+        const contacts = matchedContacts.length ? matchedContacts : EMERGENCY_CONTACTS;
+        addMsg('bot', `Nomor kontak layanan resmi:\n${contacts.map((contact) => `**${contact.name}:** ${contact.number}`).join('\n')}\n\nJika situasinya mendesak, telepon layanan terkait secara langsung.`, {
+          actions: contacts.map((contact) => ({
+            label: `Telepon ${contact.name}`,
+            payload: `tel:${contact.number}`,
+            type: 'phone' as const,
+            icon: <Phone size={13} />,
+          })),
+        });
+        return;
+      }
+
       // Complaint flow
       if (draftRef.current) {
         const handled = await processComplaint(text, pendingPhotos);
         if (handled) {
-          if (draftRef.current?.step !== 'foto') clearPhotos();
+          clearPhotos();
           return;
         }
       }
 
-      // Mulai laporan
-      if (/^(lapor|buat aduan|adu|aduan|pengaduan)$/i.test(text)) {
-        draftRef.current = { step: 'nama', photos: [] };
-        setActiveStep('nama');
-        addMsg('bot', 'Baik, saya akan memandu Anda membuat laporan resmi.\n\nSebutkan **nama lengkap** Anda terlebih dahulu:');
+      // Nomor resmi dijawab dari daftar ini, bukan ditebak AI.
+      // Foto atau perintah lapor langsung membuat draft; detail dikumpulkan bertahap.
+      const startsComplaint = /^(lapor|buat aduan|adu|aduan|pengaduan)$/i.test(text);
+      if (startsComplaint || pendingPhotos.length > 0) {
+        const hasDescription = pendingPhotos.length > 0 && text.length >= 10 && !startsComplaint;
+        draftRef.current = {
+          step: hasDescription ? 'nama' : pendingPhotos.length ? 'deskripsi' : 'nama',
+          nama: undefined,
+          kategori: undefined,
+          lokasi: undefined,
+          deskripsi: hasDescription ? text : undefined,
+          photos: [...pendingPhotos],
+        };
+        clearPhotos();
+        if (hasDescription) {
+          addMsg('bot', 'Foto dan keterangan awal sudah saya catat.');
+          askForNextComplaintField(draftRef.current);
+        } else if (pendingPhotos.length) {
+          setActiveStep('deskripsi');
+          addMsg('bot', 'Foto sudah diterima dan disimpan untuk laporan. Ceritakan **apa yang terjadi**; saya akan meminta data lain yang masih kurang setelahnya.');
+        } else {
+          askForNextComplaintField(draftRef.current);
+        }
         return;
       }
 
@@ -832,6 +917,7 @@ export default function ChatbotUnified({
   };
 
   const handleAction = (act: ChatAction) => {
+    if (act.type === 'phone') { window.location.href = act.payload; return; }
     if (act.type === 'link') { window.open(act.payload, '_blank'); return; }
     if (act.type === 'route') {
       onToggle?.(false);
@@ -868,7 +954,7 @@ export default function ChatbotUnified({
         onClick={() => onToggle?.(true)}
         disabled={isOpen || launcherHidden}
         aria-hidden={isOpen || launcherHidden}
-        aria-label="Buka Chatbot SIPEDAS"
+        aria-label="Buka Chatbot Cerdas"
         className={`fixed bottom-5 right-5 z-[1000] flex h-12 w-12 items-center justify-center rounded-full text-white shadow-xl transition-all duration-500 hover:scale-110 active:scale-95 ${
           isOpen || launcherHidden ? 'pointer-events-none scale-0 opacity-0' : 'scale-100 opacity-100'
         }`}
@@ -931,7 +1017,7 @@ export default function ChatbotUnified({
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-blue-700 bg-blue-200" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 id="chatbot-title" className="text-sm font-bold leading-tight tracking-tight">SIPEDAS Assistant</h2>
+            <h2 id="chatbot-title" className="text-sm font-bold leading-tight tracking-tight">Chatbot Cerdas</h2>
             <p className="flex items-center gap-1.5 text-[11px] font-medium text-blue-100 mt-0.5">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-200 shrink-0" />
               Sistem Pelayanan Digital Terpadu

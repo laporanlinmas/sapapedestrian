@@ -124,7 +124,7 @@ export default function GallerySection({ onOpenPage }: { onOpenPage: () => void 
 
       <div className="text-center mb-7 px-2">
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Rekam Jejak Layanan
+          Dokumentasi Kegiatan Terbaru
         </h2>
         <p className="mt-3 text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
           Dokumentasi kegiatan dan laporan terbaru di kawasan pedestrian Ponorogo, diurutkan berdasarkan tanggal.
