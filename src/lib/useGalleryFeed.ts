@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { fetchGalleryPage, type GalleryItem } from './galleryClient';
+import { fetchGalleryPage, type GalleryItem, type GalleryPage } from './galleryClient';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -27,17 +27,19 @@ import { fetchGalleryPage, type GalleryItem } from './galleryClient';
 
 const PER_PAGE = 12;
 const REFRESH_MS = 30_000;
+const galleryPageCache = new Map<number, GalleryPage>();
 
 export function useGalleryFeed(target: number, enabled = true) {
-  const [items, setItems] = useState<GalleryItem[]>([]);
+  const [items, setItems] = useState<GalleryItem[]>(() => galleryPageCache.get(1)?.items ?? []);
   const [broken, setBroken] = useState<Set<string>>(() => new Set());
   const [page, setPage] = useState(1);
-  const [pages, setPages] = useState(0);
-  const [pool, setPool] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [pages, setPages] = useState(() => galleryPageCache.get(1)?.pages ?? 0);
+  const [pool, setPool] = useState(() => galleryPageCache.get(1)?.pool ?? 0);
+  const [total, setTotal] = useState(() => galleryPageCache.get(1)?.total ?? 0);
+  const [loading, setLoading] = useState(() => !galleryPageCache.has(1));
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
+  const requestSequence = useRef(0);
 
   /** Foto yang aman ditampilkan (yang tidak rusak). */
   const tampil = items.filter((i) => !broken.has(i.id));
@@ -48,14 +50,28 @@ export function useGalleryFeed(target: number, enabled = true) {
 
   /** Muat ulang sebuah halaman dari awal (dipakai tombol pagination). */
   const load = useCallback(async (halaman: number) => {
-    setLoading(true);
+    const requestId = ++requestSequence.current;
+    const cached = galleryPageCache.get(halaman);
+    if (cached) {
+      setItems(cached.items);
+      setPage(cached.page);
+      setPages(cached.pages);
+      setPool(cached.pool ?? 0);
+      setTotal(cached.total);
+      setBroken(new Set());
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     setError('');
     const data = await fetchGalleryPage(halaman, PER_PAGE);
+    if (requestId !== requestSequence.current) return;
     if (!data) {
-      setError('Galeri belum dapat dimuat. Coba muat ulang sebentar lagi.');
+      if (!cached) setError('Galeri belum dapat dimuat. Coba muat ulang sebentar lagi.');
       setLoading(false);
       return;
     }
+    galleryPageCache.set(data.page, data);
     setItems(data.items);
     setPage(data.page);
     setPages(data.pages);
@@ -68,6 +84,8 @@ export function useGalleryFeed(target: number, enabled = true) {
   useEffect(() => {
     if (enabled) void load(1);
   }, [enabled, load]);
+
+  useEffect(() => () => { requestSequence.current += 1; }, []);
 
   useEffect(() => {
     if (!enabled) return;

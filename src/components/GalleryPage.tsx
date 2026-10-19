@@ -40,7 +40,6 @@ export default function GalleryPage({ onBack }: { onBack: () => void }) {
   const goto = (n: number) => {
     if (n < 1 || n > pages) return;
     void load(n);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
