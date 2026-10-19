@@ -26,6 +26,7 @@ import { fetchGalleryPage, type GalleryItem } from './galleryClient';
  */
 
 const PER_PAGE = 12;
+const REFRESH_MS = 30_000;
 
 export function useGalleryFeed(target: number, enabled = true) {
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -67,6 +68,12 @@ export function useGalleryFeed(target: number, enabled = true) {
   useEffect(() => {
     if (enabled) void load(1);
   }, [enabled, load]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const timer = window.setInterval(() => { void load(page); }, REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [enabled, load, page]);
 
   /**
    * Isi kekurangan: tarik foto pengganti dari cadangan indeks.

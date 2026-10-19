@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { GALLERY_PUBLIC_LIMIT, GALLERY_RESERVE_LIMIT } from '../src/lib/galleryConfig.ts';
-import { extractDriveFileId, normalizeUploadTimestamp, parseGalleryDate } from './gallery-date-utils.mts';
+import { extractDriveFileId, normalizeUploadTimestamp, parseGalleryDate } from '../src/lib/galleryDate.ts';
 
 test('gallery index capacity matches the API contract', () => {
   assert.equal(GALLERY_PUBLIC_LIMIT, 60);

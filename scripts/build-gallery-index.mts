@@ -39,7 +39,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { extractDriveFileId, normalizeUploadTimestamp, parseGalleryDate } from './gallery-date-utils.mts';
+import { extractDriveFileId, normalizeUploadTimestamp, parseGalleryDate } from '../src/lib/galleryDate.ts';
 import { GALLERY_PUBLIC_LIMIT, GALLERY_RESERVE_LIMIT } from '../src/lib/galleryConfig.ts';
 
 /* ── 1. Environment ─────────────────────────────────────────────────────── */

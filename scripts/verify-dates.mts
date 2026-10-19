@@ -1,7 +1,7 @@
 /** Compare public gallery dates with report dates in Google Sheets. */
 import crypto from 'node:crypto';
 import fs from 'node:fs';
-import { parseGalleryDate } from './gallery-date-utils.mts';
+import { parseGalleryDate } from '../src/lib/galleryDate.ts';
 
 function loadEnvFile(): void {
   const envPath = process.env.ENV_FILE || '.env';

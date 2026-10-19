@@ -5,6 +5,7 @@ import {
 } from 'firebase/firestore';
 import { withApi, getQuery, rateLimit } from '../src/lib/server/http.js';
 import { getDb } from '../src/lib/server/firebase.js';
+import { refreshGallerySource } from '../src/lib/server/gallerySource.js';
 import { GALLERY_PUBLIC_LIMIT, GALLERY_RESERVE_LIMIT } from '../src/lib/galleryConfig.js';
 
 /**
@@ -65,6 +66,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const perPage = Math.min(PER_PAGE_MAX, Math.max(1, Number(q.perPage) || 12));
 
   const db = await getDb();
+  // Keep the existing Firestore lookup for opaque image IDs, but refresh it
+  // from the report sheet so new Drive photos appear without a manual rebuild.
+  try {
+    await refreshGallerySource(db);
+  } catch (error) {
+    console.error('[gallery-source]', error instanceof Error ? error.message : error);
+  }
   const ref = collection(db, 'gallery_photos');
 
   // Rangkuman ditulis saat indeks dibangun.
@@ -74,7 +82,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Indeks belum dibangun — balas JSON supaya frontend tidak error.
   if (!total) {
-    res.setHeader('Cache-Control', 'public, max-age=30');
+    res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({
       ok: true, total: 0, limit: GALLERY_PUBLIC_LIMIT, pool: 0,
       page, start: 0, perPage, pages: 0, items: [],
@@ -115,8 +123,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     docs = pool.slice(0, Math.min(perPage, GALLERY_PUBLIC_LIMIT));
   }
 
-  // Indeks jarang berubah → boleh di-cache CDN sebentar.
-  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
+  res.setHeader('Cache-Control', 'no-store');
 
   return res.status(200).json({
     ok: true,
